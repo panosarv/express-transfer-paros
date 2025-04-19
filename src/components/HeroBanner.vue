@@ -42,7 +42,7 @@
         
         <div class="mt-6 flex justify-center md:justify-start">
           <button
-            @click="window.location.href = 'tel:+306980911843'"
+            @click="callNow"
             class="bg-[#d9b16b] text-[#232436] px-8 py-4 rounded-lg text-2xl font-semibold hover:bg-[#B4952E] transition-colors w-full sm:w-auto"
           >
             Call us
@@ -60,4 +60,7 @@ import { RouterLink } from 'vue-router';
 const scrollToBooking = () => {
   document.getElementById('booking').scrollIntoView({ behavior: 'smooth' });
 };
+function callNow() {
+  window.location.href = `tel:+306980911843`;
+}
 </script>
