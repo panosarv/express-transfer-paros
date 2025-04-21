@@ -7,7 +7,6 @@
         ref="bookingForm"
         method="POST"
         action="https://formsubmit.co/info@expresstransferparos.com"
-        @submit.prevent="onSubmit"
         class="space-y-4"
       >
         <!-- Personal Info -->
