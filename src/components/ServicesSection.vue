@@ -1,6 +1,6 @@
 <template>
   <section class="services-section">
-    <h1 class="text-3xl sm:text-4xl md:text-6xl font-bold text-gray-800 text-center "> Check out our services</h1>
+    <h1 class="text-3xl sm:text-4xl md:text-6xl font-bold text-gray-800 text-center "> Popular destinations in Paros</h1>
     <div class="carousel-container">
       <div class="carousel">
         <button class="carousel__nav carousel__nav--prev" @click="prev">‹</button>

@@ -1,6 +1,6 @@
 <script setup>
 import Navbar from './components/Navbar.vue'
-import ContactSection from './components/ContactSection.vue';
+import Footer from './components/Footer.vue';
 
 </script>
 
@@ -8,6 +8,6 @@ import ContactSection from './components/ContactSection.vue';
   <div class="bg-[#232436]-50 min-h-screen">
     <Navbar />
     <router-view />
-    <ContactSection />
+    <Footer />
   </div>
 </template>

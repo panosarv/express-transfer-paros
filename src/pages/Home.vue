@@ -1,7 +1,7 @@
 <script setup>
 import Navbar from '../components/Navbar.vue'
 import HeroBanner from '../components/HeroBanner.vue'
-import AboutSection from '../components/AboutSection.vue'
+import ContactSection from '../components/ContactSection.vue'
 import ServicesSection from '../components/ServicesSection.vue'
 import MeetTheTeam from '../components/MeetTheTeam.vue'
 </script>
@@ -10,7 +10,7 @@ import MeetTheTeam from '../components/MeetTheTeam.vue'
   <div class="min-h-screen bg-[#232436]-50">
     <Navbar />
     <HeroBanner />
-    <AboutSection />
+    <ContactSection />
     <ServicesSection />
     <div class="relative py-16 px-4 sm:px-6 lg:px-8" id="booking">
       <div class="absolute inset-0">

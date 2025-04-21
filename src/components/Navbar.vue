@@ -71,11 +71,20 @@ onUnmounted(() => {
 
     <!-- Mobile Menu -->
     <transition name="slide-fade">
-      <div v-if="isMenuOpen" class="md:hidden 'bg-[#232436]/95 backdrop-blur-md">
+      <div v-if="isMenuOpen" class="md:hidden bg-[#232436]/95 backdrop-blur-md">
         <div class="px-4 pt-2 pb-3 space-y-2">
-          <RouterLink to="/" class="block text-stone-200 hover:text-white transition py-2">Home</RouterLink>
-          <RouterLink to="/vehicles" class="block text-stone-200 hover:text-white transition py-2">Our Fleet</RouterLink>
-          <RouterLink to="/book" class="block text-stone-200 hover:text-white transition py-2">Book Us</RouterLink>
+          <RouterLink
+            to="/"
+            class="block text-stone-200 hover:text-white transition py-2"
+          >Home</RouterLink>
+          <RouterLink
+            to="/vehicles"
+            class="block text-stone-200 hover:text-white transition py-2"
+          >Our Fleet</RouterLink>
+          <RouterLink
+            to="/book"
+            class="block text-stone-200 hover:text-white transition py-2"
+          >Book Us</RouterLink>
         </div>
       </div>
     </transition>

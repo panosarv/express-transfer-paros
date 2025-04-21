@@ -1,10 +1,10 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import Home from './pages/Home.vue';
-import ToursAirports from './pages/ToursAirports.vue';
+import Fleet from './pages/Fleet.vue';
 import Book from './pages/Book.vue';
 const routes = [
   { path: '/', component: Home },
-  { path: '/vehicles', component: ToursAirports },
+  { path: '/vehicles', component: Fleet },
   { path: '/:notFound(.*)/', redirect: '/' },
   { path: '/book', component: Book }
 ];

@@ -18,7 +18,7 @@
           enter-to-class="opacity-100 translate-y-0"
         >
           <h1 class="text-3xl sm:text-4xl md:text-6xl font-bold text-[#E5E5E5] mb-6 flex items-center justify-center">
-            <img src="../assets/etp-hero.jpg" alt="Express Transfer Paros" class="h-40  w-auto md:h-auto" />
+            Express Transfer Paros
           </h1>
         </Transition>
 
