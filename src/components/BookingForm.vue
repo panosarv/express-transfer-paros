@@ -54,7 +54,7 @@
           <input
             name="pickupLocation"
             v-model="form.pickupLocation"
-            :disabled="pickupMode !== 'manual'"
+            :readonly="pickupMode !== 'manual'"
             type="text"
             required
             class="mt-1 w-full"
@@ -64,26 +64,31 @@
             type="button"
             @click="pickupMapOpen = true"
             class="mt-2 bg-blue-100 text-blue-700 border border-blue-300 rounded px-3 py-1 text-sm"
-          >Choose different location</button>
-          <p v-if="pickupError" class="text-red-600 text-sm mt-1">Pickup and drop‑off cannot be the same</p>
+          >
+            Choose different location
+          </button>
           <div class="flex gap-4 mt-2">
             <label class="inline-flex items-center">
-              <input type="radio" name="pickupMode" value="manual" v-model="pickupMode" @change="pickupMapOpen = false" />
+              <input type="radio" value="manual" v-model="pickupMode" />
               <span class="ml-2">Manually add location</span>
             </label>
             <label class="inline-flex items-center">
-              <input type="radio" name="pickupMode" value="current" v-model="pickupMode" @change="setCurrentLocation()" />
+              <input type="radio" value="current" v-model="pickupMode" />
               <span class="ml-2">Send current location</span>
             </label>
             <label class="inline-flex items-center">
-              <input type="radio" name="pickupMode" value="map" v-model="pickupMode" @change="pickupMapOpen = true" />
+              <input type="radio" value="map" v-model="pickupMode" />
               <span class="ml-2">Pick on Map</span>
             </label>
           </div>
           <div v-if="pickupMode === 'map' && pickupMapOpen" class="mt-4">
             <LMap :zoom="11" :center="pickupCenter" :options="mapOptions" style="height:250px;width:100%">
               <LTileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" attribution="&copy; OpenStreetMap contributors" />
-              <LMarker v-for="pin in pins" :key="pin.name" :lat-lng="pin.coords" @click="selectPickup(pin.name)">
+              <LMarker
+                v-for="pin in pins"
+                :key="pin.name"
+                :lat-lng="pin.coords"
+                @click="selectPickup(pin.name)">
                 <LPopup>{{ pin.name }}</LPopup>
               </LMarker>
             </LMap>
@@ -96,7 +101,7 @@
           <input
             name="dropoffLocation"
             v-model="form.dropoffLocation"
-            :disabled="dropoffMode !== 'manual'"
+            :readonly="dropoffMode !== 'manual'"
             type="text"
             required
             class="mt-1 w-full"
@@ -106,23 +111,28 @@
             type="button"
             @click="dropoffMapOpen = true"
             class="mt-2 bg-blue-100 text-blue-700 border border-blue-300 rounded px-3 py-1 text-sm"
-          >Choose different location</button>
-          <p v-if="dropoffError" class="text-red-600 text-sm mt-1">Drop-off must differ from pickup</p>
+          >
+            Choose different location
+          </button>
           <div class="flex gap-4 mt-2">
             <label class="inline-flex items-center">
-              <input type="radio" name="dropoffMode" value="manual" v-model="dropoffMode" @change="dropoffMapOpen = false" />
+              <input type="radio" value="manual" v-model="dropoffMode" />
               <span class="ml-2">Manually add location</span>
             </label>
             <label class="inline-flex items-center">
-              <input type="radio" name="dropoffMode" value="map" v-model="dropoffMode" @change="dropoffMapOpen = true" />
+              <input type="radio" value="map" v-model="dropoffMode" />
               <span class="ml-2">Pick on Map</span>
             </label>
           </div>
           <div v-if="dropoffMode === 'map' && dropoffMapOpen" class="mt-4">
             <LMap :zoom="11" :center="pickupCenter" :options="mapOptions" style="height:250px;width:100%">
               <LTileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" attribution="&copy; OpenStreetMap contributors" />
-              <LMarker v-for="pin in pins" :key="pin.name" :lat-lng="pin.coords" @click="selectDropoff(pin.name)">
-                <LPopup>{{ pin.name }}</LPopup>  
+              <LMarker
+                v-for="pin in pins"
+                :key="pin.name"
+                :lat-lng="pin.coords"
+                @click="selectDropoff(pin.name)">
+                <LPopup>{{ pin.name }}</LPopup>
               </LMarker>
             </LMap>
           </div>
@@ -132,9 +142,11 @@
         <button
           type="button"
           :disabled="!formValid"
-          @click="showModal = true"
+          @click="onSubmit"
           class="w-full bg-blue-600 text-white py-2 rounded disabled:opacity-50"
-        >Request Booking</button>
+        >
+          Request Booking
+        </button>
 
         <!-- Confirmation Modal Inside Form -->
         <div v-if="showModal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
@@ -149,7 +161,7 @@
             <p><strong>Pickup:</strong> {{ form.pickupLocation }}</p>
             <p><strong>Drop Off:</strong> {{ form.dropoffLocation }}</p>
             <div class="flex justify-end gap-4 mt-6">
-              <button type="button" @click="showModal = false" class="px-4 py-2 border rounded">Cancel</button>
+              <button type="button" @click="closeModal" class="px-4 py-2 border rounded">Cancel</button>
               <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded">Confirm</button>
             </div>
           </div>
@@ -163,12 +175,12 @@
       <div class="space-y-4">
         <button
           type="button"
-          class="w-full py-2 bg-stone-700 text-white rounded"
+          class="w-full py-2 bg-[#232436] text-white rounded"
           @click="callUs"
         >Call Us</button>
         <button
           type="button"
-          class="w-full py-2 bg-stone-700 text-white rounded"
+          class="w-full py-2 bg-[#232436] text-white rounded"
           @click="sendWhatsApp"
         >WhatsApp</button>
       </div>
@@ -200,16 +212,25 @@ const showModal = ref(false);
 // Validation flags
 const dateError = ref(false);
 const dropoffError = ref(false);
-const pickupError = computed(() => form.pickupLocation === form.dropoffLocation && form.pickupLocation);
 
 // Form valid
-const formValid = computed(() => form.name && form.surname && form.email && form.phone && form.people >= 1 && form.date && form.time && form.pickupLocation && form.dropoffLocation && !dateError.value && !dropoffError.value && !pickupError.value);
+const formValid = computed(() =>
+  form.name &&
+  form.surname &&
+  form.email &&
+  form.phone &&
+  form.people >= 1 &&
+  form.date &&
+  form.time &&
+  form.pickupLocation &&
+  form.dropoffLocation &&
+  !dateError.value
+);
 
 // Validate date & dropoff
 watch(() => form.date, val => { const t = new Date().toISOString().split('T')[0]; dateError.value = val < t; });
-watch(() => form.dropoffLocation, val => { dropoffError.value = val === form.pickupLocation && val; });
 
-// Map config & pins
+// Default map center and pins
 const mapOptions = { scrollWheelZoom: false, dragging: true };
 const pickupCenter = [37.0857, 25.2387];
 const pins = [
@@ -221,18 +242,36 @@ const pins = [
   { name: 'Ampelas', coords: [37.1032, 25.2651] }
 ];
 
+// Watchers to handle pick mode defaults and closing maps on modal
+watch(pickupMode, mode => {
+  if (mode === 'map') {
+    // default to first pin
+    form.pickupLocation = pins[0].name;
+    pickupMapOpen.value = true;
+  }
+});
+watch(dropoffMode, mode => {
+  if (mode === 'map') {
+    form.dropoffLocation = pins[0].name;
+    dropoffMapOpen.value = true;
+  }
+});
+watch(showModal, open => {
+  if (open) {
+    pickupMapOpen.value = false;
+    dropoffMapOpen.value = false;
+  }
+});
+
 // Handlers
 function setCurrentLocation() { pickupMapOpen.value = false; navigator.geolocation.getCurrentPosition(p => form.pickupLocation = `${p.coords.latitude.toFixed(5)}, ${p.coords.longitude.toFixed(5)}`); }
 function selectPickup(name) { form.pickupLocation = name; pickupMapOpen.value = false; }
 function selectDropoff(name) { form.dropoffLocation = name; dropoffMapOpen.value = false; dropoffError.value = name === form.pickupLocation; }
-
-// Show modal on form submit
+function closeModal() { showModal.value = false; }
 function onSubmit() { showModal.value = true; }
 
-// Call Us
+// External actions
 function callUs() { window.location.href = 'tel:+306980911843'; }
-
-// Send WhatsApp message
 function sendWhatsApp() {
   const msg =
     `Name: ${form.name} ${form.surname}\n` +
