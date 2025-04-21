@@ -64,9 +64,7 @@
             type="button"
             @click="pickupMapOpen = true"
             class="mt-2 bg-blue-100 text-blue-700 border border-blue-300 rounded px-3 py-1 text-sm"
-          >
-            Choose different location
-          </button>
+          >Choose different location</button>
           <p v-if="pickupError" class="text-red-600 text-sm mt-1">Pickup and drop‑off cannot be the same</p>
           <div class="flex gap-4 mt-2">
             <label class="inline-flex items-center">
@@ -83,19 +81,9 @@
             </label>
           </div>
           <div v-if="pickupMode === 'map' && pickupMapOpen" class="mt-4">
-            <LMap
-              :zoom="11"
-              :center="pickupCenter"
-              :options="mapOptions"
-              style="height: 250px; width: 100%"
-            >
+            <LMap :zoom="11" :center="pickupCenter" :options="mapOptions" style="height:250px;width:100%">
               <LTileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" attribution="&copy; OpenStreetMap contributors" />
-              <LMarker
-                v-for="pin in pins"
-                :key="pin.name"
-                :lat-lng="pin.coords"
-                @click="selectPickup(pin.name)"
-              >
+              <LMarker v-for="pin in pins" :key="pin.name" :lat-lng="pin.coords" @click="selectPickup(pin.name)">
                 <LPopup>{{ pin.name }}</LPopup>
               </LMarker>
             </LMap>
@@ -117,10 +105,8 @@
             v-if="dropoffMode === 'map' && !dropoffMapOpen"
             type="button"
             @click="dropoffMapOpen = true"
-            class="mt-2 bg-blue-100 text-blue-700	border border-blue-300 rounded px-3 py-1 text-sm"
-          >
-            Choose different location
-          </button>
+            class="mt-2 bg-blue-100 text-blue-700 border border-blue-300 rounded px-3 py-1 text-sm"
+          >Choose different location</button>
           <p v-if="dropoffError" class="text-red-600 text-sm mt-1">Drop-off must differ from pickup</p>
           <div class="flex gap-4 mt-2">
             <label class="inline-flex items-center">
@@ -133,20 +119,10 @@
             </label>
           </div>
           <div v-if="dropoffMode === 'map' && dropoffMapOpen" class="mt-4">
-            <LMap
-              :zoom="11"
-              :center="pickupCenter"
-              :options="mapOptions"
-              style="height: 250px; width: 100%"
-            >
+            <LMap :zoom="11" :center="pickupCenter" :options="mapOptions" style="height:250px;width:100%">
               <LTileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" attribution="&copy; OpenStreetMap contributors" />
-              <LMarker
-                v-for="pin in pins"
-                :key="pin.name"
-                :lat-lng="pin.coords"
-                @click="selectDropoff(pin.name)"
-              >
-                <LPopup>{{ pin.name }}</LPopup>
+              <LMarker v-for="pin in pins" :key="pin.name" :lat-lng="pin.coords" @click="selectDropoff(pin.name)">
+                <LPopup>{{ pin.name }}</LPopup>  
               </LMarker>
             </LMap>
           </div>
@@ -158,9 +134,7 @@
           :disabled="!formValid"
           @click="showModal = true"
           class="w-full bg-blue-600 text-white py-2 rounded disabled:opacity-50"
-        >
-          Request Booking
-        </button>
+        >Request Booking</button>
 
         <!-- Confirmation Modal Inside Form -->
         <div v-if="showModal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
@@ -191,16 +165,12 @@
           type="button"
           class="w-full py-2 bg-stone-700 text-white rounded"
           @click="callUs"
-        >
-          Call Us
-        </button>
+        >Call Us</button>
         <button
           type="button"
           class="w-full py-2 bg-stone-700 text-white rounded"
           @click="sendWhatsApp"
-        >
-          WhatsApp
-        </button>
+        >WhatsApp</button>
       </div>
     </section>
   </div>
@@ -233,12 +203,7 @@ const dropoffError = ref(false);
 const pickupError = computed(() => form.pickupLocation === form.dropoffLocation && form.pickupLocation);
 
 // Form valid
-const formValid = computed(() =>
-  form.name && form.surname && form.email && form.phone &&
-  form.people >= 1 && form.date && form.time &&
-  form.pickupLocation && form.dropoffLocation &&
-  !dateError.value && !dropoffError.value && !pickupError.value
-);
+const formValid = computed(() => form.name && form.surname && form.email && form.phone && form.people >= 1 && form.date && form.time && form.pickupLocation && form.dropoffLocation && !dateError.value && !dropoffError.value && !pickupError.value);
 
 // Validate date & dropoff
 watch(() => form.date, val => { const t = new Date().toISOString().split('T')[0]; dateError.value = val < t; });
@@ -265,9 +230,7 @@ function selectDropoff(name) { form.dropoffLocation = name; dropoffMapOpen.value
 function onSubmit() { showModal.value = true; }
 
 // Call Us
-function callUs() {
-  window.location.href = 'tel:+306980911843';
-}
+function callUs() { window.location.href = 'tel:+306980911843'; }
 
 // Send WhatsApp message
 function sendWhatsApp() {
