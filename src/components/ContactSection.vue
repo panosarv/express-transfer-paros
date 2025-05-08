@@ -1,15 +1,14 @@
 <template>
   <div ref="aboutSection" class="py-16 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-[#232436] to-[#2C2C2C]" id="contact">
     <div class="max-w-7xl mx-auto text-center mb-12">
-   
+      <h2 class="text-xl tracking-widest uppercase text-white font-theme-heading mb-2">Ready to explore Paros with us?</h2>
+      <p class="text-white mb-6">Choose any of the methods below to contact Express Transfer Paros:</p>
     </div>
 
-    <!-- Contact and Map Section -->
+    <!-- Contact and Counters Section -->
     <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8">
       <!-- Contact Options Column -->
       <div>
-        <h2 class="text-xl tracking-widest uppercase text-white font-theme-heading mb-2">Ready to explore Paros with us?</h2>
-        <p class="text-white mb-6">Choose any of the methods below to contact Express Transfer Paros:</p>
         <div class="flex flex-col space-y-4">
           <div class="card bg-white">
             <a href="mailto:info@expresstransferparos.com" class="block p-4 text-center text-[#232436] flex flex-col items-center">
@@ -32,16 +31,19 @@
         </div>
       </div>
 
-      <!-- Map Column -->
-      <div>
-        <div class="w-full h-full rounded-lg overflow-hidden shadow-md">
-          <iframe
-            src="https://maps.google.com/maps?q=Paros,%20Greece&z=12&output=embed"
-            frameborder="0"
-            class="w-full h-full"
-            allowfullscreen=""
-            loading="lazy"
-          ></iframe>
+      <!-- Counters Column -->
+      <div ref="aboutSection" class="flex flex-col items-center justify-center space-y-8 counters">
+        <div class="counter text-center">
+          <span class="count" data-start="2000" data-target="2500">2000</span><span class="plus">+</span>
+          <p class="label text-gray-300 mt-2">Completed rides</p>
+        </div>
+        <div class="counter text-center">
+          <span class="count" data-start="7000" data-target="8000">7000</span><span class="plus">+</span>
+          <p class="label text-gray-300 mt-2">Satisfied customers</p>
+        </div>
+        <div class="counter text-center">
+          <span class="count" data-start="1" data-target="2">1</span><span class="plus">+</span>
+          <p class="label text-gray-300 mt-2">Years of experience</p>
         </div>
       </div>
     </div>
@@ -50,35 +52,64 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
-import { Transition } from 'vue';
 
 const aboutSection = ref(null);
-let totalSlides = 0;
-let index = ref(0);
+
+function animateCounters() {
+  const counters = aboutSection.value.querySelectorAll('.count');
+  counters.forEach(counter => {
+    const start = +counter.getAttribute('data-start') || 0;
+    const target = +counter.getAttribute('data-target');
+    const delta = target - start;
+    const duration = 800; // total duration in ms
+    const stepTime = Math.max(Math.floor(duration / delta), 20);
+    let current = start;
+    const increment = () => {
+      current += 1;
+      counter.textContent = current;
+      if (current < target) {
+        setTimeout(increment, stepTime);
+      }
+    };
+    increment();
+  });
+}
 
 onMounted(() => {
-  // Intersection Observer to toggle background
   const observer = new IntersectionObserver(
-    ([entry]) => {
-      // No dynamic toggling needed here
+    ([entry], obs) => {
+      if (entry.isIntersecting) {
+        animateCounters();
+        obs.unobserve(entry.target);
+      }
     },
     { threshold: 0.3 }
   );
-
-  if (aboutSection.value) {
-    observer.observe(aboutSection.value);
-  }
+  if (aboutSection.value) observer.observe(aboutSection.value);
 });
 </script>
 
 <style scoped>
+.counter .count {
+  display: inline-block;
+  font-size: 2.5rem;
+  font-weight: bold;
+  color: #cba671;
+}
+.counter .plus {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #cba671;
+}
+.label {
+  font-size: 1rem;
+}
 .card {
   width: 100%;
   transition: transform 0.3s ease-in-out;
   border-radius: 0.5rem;
   box-shadow: 0 1px 3px rgba(0,0,0,0.1);
 }
-
 .card:hover {
   transform: scale(1.05);
   border: 2px solid #cba671;
