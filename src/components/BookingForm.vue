@@ -175,7 +175,7 @@
             </p>
             <div class="flex justify-end gap-4 mt-6">
               <button type="button" @click="closeModal" class="px-4 py-2 border rounded">Cancel</button>
-              <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded">Confirm</button>
+              <button type="button" @click="submitForm"  class="px-4 py-2 bg-blue-600 text-white rounded">Confirm</button>
             </div>
           </div>
         </div>
@@ -212,6 +212,10 @@ const showModal = ref(false);
 const dateError = ref(false);
 const pickupError = ref(false);
 const dropoffError = ref(false);
+const bookingForm = ref(null);
+const pickupLocation = ref('');
+const dropoffLocation = ref('');
+
 
 // Price tables for Naousa pickup
 const priceTables = {
@@ -317,6 +321,13 @@ const pins = [
 const mapOptions = { scrollWheelZoom: false, dragging: true };
 const defaultCenter = [37.1236, 25.2387];
 
+const submitForm = () => {
+  if (formValid.value) {
+    bookingForm.value.submit();
+  } else {
+    alert('Please fill in all required fields correctly.');
+  }
+};
 // Computed coords for previews
 const currentPickupCoords = computed(() => {
   const pin = pins.find(p => p.name === form.value.pickupLocation);
