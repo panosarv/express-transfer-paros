@@ -42,7 +42,7 @@
           <p class="label text-gray-300 mt-2">Satisfied customers</p>
         </div>
         <div class="counter text-center">
-          <span class="count" data-start="1" data-target="2">1</span><span class="plus">+</span>
+          <span class="count" data-start="1" data-target="5">1</span><span class="plus">+</span>
           <p class="label text-gray-300 mt-2">Years of experience</p>
         </div>
       </div>
@@ -57,21 +57,27 @@ const aboutSection = ref(null);
 
 function animateCounters() {
   const counters = aboutSection.value.querySelectorAll('.count');
+  const duration = 2000; // total animation time in ms
+
   counters.forEach(counter => {
     const start = +counter.getAttribute('data-start') || 0;
     const target = +counter.getAttribute('data-target');
-    const delta = target - start;
-    const duration = 800; // total duration in ms
-    const stepTime = Math.max(Math.floor(duration / delta), 20);
-    let current = start;
-    const increment = () => {
-      current += 1;
-      counter.textContent = current;
-      if (current < target) {
-        setTimeout(increment, stepTime);
+    const range = target - start;
+    const startTime = performance.now();
+
+    function update(now) {
+      const elapsed = now - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      counter.textContent = Math.floor(start + range * progress);
+
+      if (progress < 1) {
+        requestAnimationFrame(update);
+      } else {
+        counter.textContent = target;
       }
-    };
-    increment();
+    }
+
+    requestAnimationFrame(update);
   });
 }
 
@@ -88,6 +94,7 @@ onMounted(() => {
   if (aboutSection.value) observer.observe(aboutSection.value);
 });
 </script>
+
 
 <style scoped>
 .counter .count {

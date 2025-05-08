@@ -5,6 +5,11 @@
       <h2 class="text-2xl font-semibold mb-4">Submit booking request</h2>
       <form ref="bookingForm" method="POST" action="https://formsubmit.co/info@expresstransferparos.com"
         class="space-y-4" @submit.prevent="openModal">
+        <input
+          type="hidden"
+          name="price"
+          v-model="price"
+        />
         <!-- Personal Info -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
@@ -41,7 +46,7 @@
         <!-- Number of People -->
         <div>
           <label class="block font-medium">People</label>
-          <input name="people" v-model.number="form.people" type="number" min="1" max="8" required class="mt-1 w-24" />
+          <input name="people" v-model.number="form.people" type="number" min="1"  required class="mt-1 w-24" />
         </div>
 
         <!-- Pickup Location -->
@@ -187,8 +192,7 @@
       <h2 class="text-2xl font-semibold mb-4">Other ways to get in touch</h2>
       <div class="space-y-4">
         <p>Call or WhatsApp:</p>
-        <a href="tel:+302284082379" class="block text-blue-600">+30 22840 82379 (Paros)</a>
-        <a href="tel:+302284081234" class="block text-blue-600">+30 22840 81234 (Naousa)</a>
+        <a href="tel:+302284082379" class="block text-blue-600">+30 698 091 1843</a>
         <p>Email:</p>
         <a href="mailto:info@expresstransferparos.com" class="block text-blue-600">info@expresstransferparos.com</a>
       </div>
@@ -204,7 +208,7 @@ import { LMap, LTileLayer, LMarker, LPopup } from '@vue-leaflet/vue-leaflet';
 // Form state
 const form = ref({
   name: '', surname: '', email: '', phone: '', date: '', time: '', people: 1,
-  pickupLocation: '', dropoffLocation: ''
+  pickupLocation: '', dropoffLocation: '', price: 0
 });
 const pickupMode = ref('manual');
 const dropoffMode = ref('manual');
@@ -213,8 +217,7 @@ const dateError = ref(false);
 const pickupError = ref(false);
 const dropoffError = ref(false);
 const bookingForm = ref(null);
-const pickupLocation = ref('');
-const dropoffLocation = ref('');
+
 
 
 // Price tables for Naousa pickup
@@ -229,7 +232,7 @@ const priceTables = {
     Pounta: { '1-4': 36, '5-8': 45 },
     'Krios - cabana': { '1-4': 36, '5-8': 40 },
     'SantaMaria - Ampelas': { '1-4': 45, '5-8': 60 },
-    Parikia: { '1-4': 35, '5-8': 50 }
+    Parikia: { '1-4': 36, '5-8': 50 }
   },
   Naousa: {
     Parikia: { '1-4': 36, '5-8': 50 },
@@ -241,7 +244,7 @@ const priceTables = {
     Pounta: { '1-4': 50, '5-8': 65 },
     'Krios - cabana': { '1-4': 45, '5-8': 60 },
     'SantaMaria - Ampelas': { '1-4': 36, '5-8': 45 },
-    Naousa: { '1-4': 35, '5-8': 50 }
+    Naousa: { '1-4': 36, '5-8': 50 }
   },
   'SantaMaria - Ampelas': {
     Parikia: { '1-4': 45, '5-8': 60 },
@@ -253,7 +256,7 @@ const priceTables = {
     'Piso Livadi': { '1-4': 40, '5-8': 55 },
     Pounta: { '1-4': 55, '5-8': 70 },
     'Krios - cabana': { '1-4': 45, '5-8': 60 },
-    'SantaMaria - Ampelas': { '1-4': 35, '5-8': 50 }
+    'SantaMaria - Ampelas': { '1-4': 36, '5-8': 50 }
   },
   'Drios - ΧΑ': {
     Parikia: { '1-4': 50, '5-8': 65 },
@@ -265,7 +268,7 @@ const priceTables = {
     Pounta: { '1-4': 50, '5-8': 65 },
     'Krios - cabana': { '1-4': 55, '5-8': 70 },
     'SantaMaria - Ampelas': { '1-4': 50, '5-8': 65 },
-    'Drios - ΧΑ': { '1-4': 35, '5-8': 50 }
+    'Drios - ΧΑ': { '1-4': 36, '5-8': 50 }
   },
   'Aerodromio - Alyki': {
     Parikia: { '1-4': 40, '5-8': 55 },
@@ -277,7 +280,7 @@ const priceTables = {
     Pounta: { '1-4': 36, '5-8': 50 },
     'Krios - cabana': { '1-4': 45, '5-8': 60 },
     'SantaMaria - Ampelas': { '1-4': 55, '5-8': 70 },
-    'Aerodromio - Alyki': { '1-4': 35, '5-8': 50 }
+    'Aerodromio - Alyki': { '1-4': 36, '5-8': 50 }
   },
   Lefkes: {
     Parikia: { '1-4': 45, '5-8': 60 },
@@ -289,7 +292,7 @@ const priceTables = {
     Pounta: { '1-4': 50, '5-8': 65 },
     'Krios - cabana': { '1-4': 50, '5-8': 65 },
     'SantaMaria - Ampelas': { '1-4': 40, '5-8': 55 },
-    'Lefkes': { '1-4': 35, '5-8': 50 }
+    'Lefkes': { '1-4': 36, '5-8': 50 }
   },
   'Piso Livadi': {
     Parikia: { '1-4': 50, '5-8': 65 },
@@ -301,6 +304,7 @@ const priceTables = {
     Pounta: { '1-4': 50, '5-8': 65 },
     'Krios - cabana': { '1-4': 55, '5-8': 70 },
     'SantaMaria - Ampelas': { '1-4': 45, '5-8': 60 },
+    'Piso Livadi': { '1-4': 36, '5-8': 50 }
   }
 };
 
