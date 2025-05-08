@@ -305,6 +305,30 @@ const priceTables = {
     'Krios - cabana': { '1-4': 55, '5-8': 70 },
     'SantaMaria - Ampelas': { '1-4': 45, '5-8': 60 },
     'Piso Livadi': { '1-4': 36, '5-8': 50 }
+  },
+  'Krios - cabana': {
+    Parikia: { '1-4': 36, '5-8': 50 },
+    Naousa: { '1-4': 45, '5-8': 60 },
+    Monastiri: { '1-4': 36, '5-8': 50 },
+    'Aerodromio - Alyki': { '1-4': 45, '5-8': 60 },
+    'Drios - ΧΑ': { '1-4': 55, '5-8': 70 },
+    Lefkes: { '1-4': 50, '5-8': 65 },
+    'Piso Livadi': { '1-4': 55, '5-8': 70 },
+    Pounta: { '1-4': 36, '5-8': 50 },
+    'SantaMaria - Ampelas': { '1-4': 45, '5-8': 60 },
+    'Krios - cabana': { '1-4': 36, '5-8': 50 }
+  },
+  Monastiri: {
+    Parikia: { '1-4': 40, '5-8': 55 },
+    Naousa: { '1-4': 36, '5-8': 45 },
+    'Aerodromio - Alyki': { '1-4': 50, '5-8': 65 },
+    'Drios - ΧΑ': { '1-4': 50, '5-8': 65 },
+    Lefkes: { '1-4': 45, '5-8': 60 },
+    'Piso Livadi': { '1-4': 40, '5-8': 55 },
+    Pounta: { '1-4': 40, '5-8': 55 },
+    'Krios - cabana': { '1-4': 36, '5-8': 50 },
+    'SantaMaria - Ampelas': { '1-4': 40, '5-8': 55 },
+    Monastiri: { '1-4': 36, '5-8': 50 }
   }
 };
 
