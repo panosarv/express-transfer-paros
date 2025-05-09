@@ -41,10 +41,10 @@
 
 <script>
 import { Transition } from 'vue';
-import peugeotImage from '../assets/features-car-1.png';
+import peugeotImage from '../assets/p5008-etp.jpeg';
 import c3Image from '../assets/features-car-2.png';
 import vclassImage from '../assets/features-car-3.png';
-import vitoImage from '../assets/hero-car-3.png';
+import vitoImage from '../assets/vito-etp.jpeg';
 
 export default {
   name: 'FleetSection',
@@ -53,25 +53,16 @@ export default {
     return {
       vehicles: [
         {
-          name: 'Peugeot 3008',
+          name: 'Peugeot 5008',
           image: peugeotImage,
-          description: 'Compact SUV seating up to 5 passengers, featuring spacious trunk, comfortable ride, and modern safety features.'
-        },
-        {
-          name: 'Citroën C3',
-          image: c3Image,
-          description: 'Efficient hatchback ideal for city drives, offering nimble handling, fuel economy, and comfy interior.'
+          description: 'Compact SUV seating up to 7 passengers, featuring spacious trunk, comfortable ride, and modern safety features.'
         },
         {
           name: 'Mercedes Vito',
           image: vitoImage,
-          description: 'Luxury 7-seater MPV with premium leather seating, climate control, and VIP comfort for your journey.'
+          description: 'Luxury 9-seater MPV with premium leather seating, climate control, and VIP comfort for your journey.'
         },
-        {
-          name: 'Mercedes V-Class',
-          image: vclassImage,
-          description: 'Versatile 8-seater van, perfect for group transfers, with generous legroom and ample luggage capacity.'
-        },
+
         
       ]
     };
