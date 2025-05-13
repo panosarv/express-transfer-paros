@@ -5,11 +5,7 @@
       <h2 class="text-2xl font-semibold mb-4">Submit booking request</h2>
       <form ref="bookingForm" method="POST" action="https://formsubmit.co/info@expresstransferparos.com"
         class="space-y-4" @submit.prevent="openModal">
-        <input
-          type="hidden"
-          name="price"
-          v-model="price"
-        />
+        <input type="hidden" name="price" v-model="price" />
         <!-- Personal Info -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
@@ -26,7 +22,7 @@
           </div>
           <div>
             <label class="block font-medium">Phone</label>
-            <input name="phone" v-model="form.phone" type="tel" required class="mt-1 w-full" />
+            <vue-tel-input name="phone" v-model="form.phone" :mode="'international'" :validCharactersOnly=true :invalidMsg="'Please enter a valid number'" class="mt-1 w-full"></vue-tel-input>
           </div>
         </div>
 
@@ -46,7 +42,7 @@
         <!-- Number of People -->
         <div>
           <label class="block font-medium">People</label>
-          <input name="people" v-model.number="form.people" type="number" min="1"  required class="mt-1 w-24" />
+          <input name="people" v-model.number="form.people" type="number" min="1" required class="mt-1 w-24" />
         </div>
         <input type="hidden" name="pickupLocation" v-model="form.pickupLocation" />
         <input type="hidden" name="dropoffLocation" v-model="form.dropoffLocation" />
@@ -181,7 +177,8 @@
             </p>
             <div class="flex justify-end gap-4 mt-6">
               <button type="button" @click="closeModal" class="px-4 py-2 border rounded">Cancel</button>
-              <button type="button" @click="submitForm"  class="px-4 py-2 bg-blue-600 text-white rounded">Confirm</button>
+              <button type="button" @click="submitForm"
+                class="px-4 py-2 bg-blue-600 text-white rounded">Confirm</button>
             </div>
           </div>
         </div>
@@ -218,7 +215,6 @@ const dateError = ref(false);
 const pickupError = ref(false);
 const dropoffError = ref(false);
 const bookingForm = ref(null);
-
 const minDate = computed(() => {
   return new Date().toISOString().split('T')[0]
 })
