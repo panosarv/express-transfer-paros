@@ -34,7 +34,7 @@
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label class="block font-medium">Date</label>
-            <input name="date" v-model="form.date" type="date" required class="mt-1 w-full" />
+            <input name="date" v-model="form.date" type="date" :min="minDate" required class="mt-1 w-full" />
             <p v-if="dateError" class="text-red-600 text-sm">Select a different date</p>
           </div>
           <div>
@@ -48,7 +48,8 @@
           <label class="block font-medium">People</label>
           <input name="people" v-model.number="form.people" type="number" min="1"  required class="mt-1 w-24" />
         </div>
-
+        <input type="hidden" name="pickupLocation" v-model="form.pickupLocation" />
+        <input type="hidden" name="dropoffLocation" v-model="form.dropoffLocation" />
         <!-- Pickup Location -->
         <div>
           <label class="block font-medium">Pickup location</label>
@@ -69,7 +70,7 @@
 
           <!-- Manual Input -->
           <div v-if="pickupMode === 'manual'" class="mt-4">
-            <input name="pickupLocation" v-model="form.pickupLocation" type="text" required class="mt-1 w-full border rounded" />
+            <input v-model="form.pickupLocation" type="text" required class="mt-1 w-full border rounded" />
           </div>
 
           <!-- Current Location -->
@@ -123,7 +124,7 @@
 
           <!-- Manual Input -->
           <div v-if="dropoffMode === 'manual'" class="mt-4">
-            <input name="dropoffLocation" v-model="form.dropoffLocation" type="text" required class="mt-1 w-full border rounded" />
+            <input v-model="form.dropoffLocation" type="text" required class="mt-1 w-full border rounded" />
           </div>
 
           <!-- Current Location -->
@@ -218,7 +219,9 @@ const pickupError = ref(false);
 const dropoffError = ref(false);
 const bookingForm = ref(null);
 
-
+const minDate = computed(() => {
+  return new Date().toISOString().split('T')[0]
+})
 
 // Price tables for Naousa pickup
 const priceTables = {
