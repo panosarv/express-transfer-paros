@@ -4,7 +4,7 @@
       <!-- Background overlay if needed -->
     </div>
 
-    <div class="relative text-center md:text-left max-w-4xl mx-auto px-4">
+    <div class="relative text-center md:text-left max-w-4xl mx-auto px-4 py-8">
       <!-- Header -->
       <Transition
         appear
@@ -12,20 +12,14 @@
         enter-from-class="opacity-0 translate-y-6"
         enter-to-class="opacity-100 translate-y-0"
       >
-        <h1 class="text-3xl sm:text-4xl md:text-6xl font-bold text-gray-800 ">
-          Meet the Team
-        </h1>
       </Transition>
 
-      <!-- Instagram embed iframe -->
-      <div class="instagram-embed-container">
-        <iframe
-          class="instagram-iframe w-full h-64 sm:h-80 md:h-96 lg:h-[500px] mx-auto"
-          src="https://www.instagram.com/expresstransfer_paros/embed"
-          frameborder="0"
-          scrolling="yes"
-          allowtransparency="true"
-        ></iframe>
+      <!-- Elfsight widget -->
+      <div class="elfsight-container mx-auto mb-6">
+        <div
+          class="elfsight-app-f8fb4e1a-a49a-40b4-a49e-302c15ad3184"
+          data-elfsight-app-lazy
+        ></div>
       </div>
 
       <!-- Team description -->
@@ -35,7 +29,7 @@
         enter-from-class="opacity-0 translate-y-6"
         enter-to-class="opacity-100 translate-y-0"
       >
-        <p class="text-lg sm:text-xl md:text-2xl text-gray-700 leading-relaxed text-justify mt-6 w-full md:w-2/3 mx-auto">  
+        <p class="text-lg sm:text-xl md:text-2xl text-gray-700 leading-relaxed text-justify mt-6 w-full md:w-2/3 mx-auto">
           {{ teamDescription }}
         </p>
       </Transition>
@@ -51,6 +45,13 @@ export default {
       teamDescription:
         'At Express Transfer Paros, our team of professional drivers combines local expertise with warm hospitality, ensuring every journey on the island is safe, reliable, and memorable.'
     };
+  },
+  mounted() {
+    // Dynamically load Elfsight platform script
+    const script = document.createElement('script');
+    script.src = 'https://static.elfsight.com/platform/platform.js';
+    script.async = true;
+    document.body.appendChild(script);
   }
 };
 </script>
@@ -58,22 +59,16 @@ export default {
 <style scoped>
 .team-section {
   background: white;
-  padding-top: 4rem;
-  padding-bottom: 4rem;
 }
-.instagram-embed-container {
-  /* Center and contain iframe */
-}
-.instagram-iframe {
-  border: none;
-  overflow: auto;
-  border: none;
+
+.instagram-embed-container,
+.elfsight-container {
+  width: 100%;
 }
 .team-section h1 {
-  color: #1f2937;
+  color: #232436;
 }
 .team-section p {
   max-width: 36rem;
-  margin-top: 1rem;
 }
 </style>

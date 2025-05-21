@@ -62,7 +62,7 @@ onUnmounted(() => {
             </div>
           </div>
 
-          <RouterLink to="/book" class="hover:text-white transition"
+          <RouterLink to="/booking" class="hover:text-white transition"
             :class="{ 'text-white': !isAtTop || !isWhiteBackgroundPage, 'text-black': isAtTop && isWhiteBackgroundPage }"
           >Online Booking</RouterLink>
         </div>
@@ -99,7 +99,7 @@ onUnmounted(() => {
             <RouterLink to="/services/disposal-services" class="block text-stone-200 hover:text-white transition py-2">Disposal Services</RouterLink>
             <RouterLink to="/services/wedding" class="block text-stone-200 hover:text-white transition py-2">Wedding</RouterLink>
           </div>
-          <RouterLink to="/book" class="block text-stone-200 hover:text-white transition py-2">Online Booking</RouterLink>
+          <RouterLink to="/booking" class="block text-stone-200 hover:text-white transition py-2">Online Booking</RouterLink>
         </div>
       </div>
     </transition>

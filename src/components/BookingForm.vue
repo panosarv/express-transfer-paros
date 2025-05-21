@@ -1,225 +1,469 @@
 <template>
-  <div class="flex flex-col lg:flex-row gap-8">
-    <!-- Left Column: Booking Form -->
-    <section class="w-full lg:w-1/2 bg-white p-6 rounded shadow">
-      <h2 class="text-2xl font-semibold mb-4">Submit booking request</h2>
-      <form ref="bookingForm" method="POST" action="https://formsubmit.co/info@expresstransferparos.com"
-        class="space-y-4" @submit.prevent="openModal">
-        <input type="hidden" name="price" v-model="price" />
-        <!-- Personal Info -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label class="block font-medium">Name</label>
-            <input name="name" v-model="form.name" type="text" required class="mt-1 w-full" />
-          </div>
-          <div>
-            <label class="block font-medium">Surname</label>
-            <input name="surname" v-model="form.surname" type="text" required class="mt-1 w-full" />
-          </div>
-          <div>
-            <label class="block font-medium">Email</label>
-            <input name="email" v-model="form.email" type="email" required class="mt-1 w-full" />
-          </div>
-          <div>
-            <label class="block font-medium">Phone</label>
-            <vue-tel-input name="phone" v-model="form.phone" :mode="'international'" :validCharactersOnly=true :invalidMsg="'Please enter a valid number'" class="mt-1 w-full"></vue-tel-input>
-          </div>
+  <div class="booking-page space-y-12">
+    <!-- Tours & Transfers Booking Steps -->
+    <section class="max-w-3xl mx-auto bg-gradient-to-b from-[#232436] to-[#2C2C2C] text-white rounded-lg p-6">
+      <h2 class="text-xl tracking-widest uppercase text-[#cba671] font-theme-heading mb-4 text-center">
+        Book a Tour or Private Transfer
+      </h2>
+      <form ref="bookingForm" method="POST"  action="https://formspree.io/f/xldbkeed" @submit.prevent="submitBooking" class="space-y-6">
+        <template v-for="(val, key) in form" :key="key">
+          <input type="hidden" :name="key" :value="val" />
+        </template>
+        <!-- Progress Bar -->
+        <div class="flex justify-between mb-6">
+          <span
+            v-for="n in finalStep"
+            :key="n"
+            class="w-1/5 h-1 rounded"
+            :class="n <= currentStep ? 'bg-[#cba671]' : 'bg-gray-700'"
+          ></span>
         </div>
 
-        <!-- Date and Time -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label class="block font-medium">Date</label>
-            <input name="date" v-model="form.date" type="date" :min="minDate" required class="mt-1 w-full" />
-            <p v-if="dateError" class="text-red-600 text-sm">Select a different date</p>
-          </div>
-          <div>
-            <label class="block font-medium">Time</label>
-            <input name="time" v-model="form.time" type="time" required class="mt-1 w-full" />
-          </div>
-        </div>
-
-        <!-- Number of People -->
-        <div>
-          <label class="block font-medium">People</label>
-          <input name="people" v-model.number="form.people" type="number" min="1" required class="mt-1 w-24" />
-        </div>
-        <input type="hidden" name="pickupLocation" v-model="form.pickupLocation" />
-        <input type="hidden" name="dropoffLocation" v-model="form.dropoffLocation" />
-        <!-- Pickup Location -->
-        <div>
-          <label class="block font-medium">Pickup location</label>
-          <div class="flex mt-2">
-            <label class="inline-flex items-center">
-              <input type="radio" value="manual" v-model="pickupMode" />
-              <span class="ml-2">Manually add location</span>
-            </label>
-            <label class="inline-flex items-center">
-              <input type="radio" value="current" v-model="pickupMode" />
-              <span class="ml-2">Use current location</span>
-            </label>
-            <label class="inline-flex items-center">
-              <input type="radio" value="list" v-model="pickupMode" />
-              <span class="ml-2">Select from list</span>
-            </label>
-          </div>
-
-          <!-- Manual Input -->
-          <div v-if="pickupMode === 'manual'" class="mt-4">
-            <input v-model="form.pickupLocation" type="text" required class="mt-1 w-full border rounded" />
-          </div>
-
-          <!-- Current Location -->
-          <div v-if="pickupMode === 'current'" class="mt-4">
-            <button type="button" @click="setCurrentLocation(false)"
-              class="bg-blue-100 text-blue-700 border border-blue-300 rounded px-3 py-1 text-sm">
-              Use my location
-            </button>
-            <p v-if="pickupError" class="text-red-600 text-sm">Unable to retrieve location</p>
-          </div>
-
-          <!-- Select From List -->
-          <div v-if="pickupMode === 'list'" class="mt-4">
-            <select v-model="form.pickupLocation" required class="mt-1 w-full border rounded p-2">
-              <option disabled value="">Select location</option>
-              <option v-for="pin in pins" :key="pin.name" :value="pin.name">
-                {{ pin.name }}
-              </option>
+        <!-- Step 1: Type & Tour Selection -->
+        <transition name="fade-up" mode="out-in">
+          <div v-if="currentStep === 1" class="space-y-4" key="step1">
+            <h3 class="text-lg font-semibold">What would you like to book?</h3>
+            <select v-model="form.type" class="w-full border rounded p-2 bg-[#2C2C2C]">
+              <option disabled value="">Select booking type</option>
+              <option value="tour">Private Tour</option>
+              <option value="transfer">Private Transfer</option>
             </select>
-
-            <!-- only render the map once user has picked and modal is closed -->
-            <div v-if="form.pickupLocation && !showModal" class="mt-4">
-              <LMap :zoom="11" :center="currentPickupCoords" :options="mapOptions" style="height:250px;width:100%">
-                <LTileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                  attribution="&copy; OpenStreetMap contributors" />
-                <LMarker :lat-lng="currentPickupCoords">
-                  <LPopup>{{ form.pickupLocation }}</LPopup>
-                </LMarker>
-              </LMap>
+            <div v-if="form.type === 'tour'">
+              <label class="block mb-2">Select Tour</label>
+              <select v-model="form.tour" class="w-full border rounded p-2 bg-[#2C2C2C]">
+                <option disabled value="">Choose a tour</option>
+                <option v-for="t in tours" :key="t" :value="t">{{ t }}</option>
+              </select>
             </div>
           </div>
-        </div>
+        </transition>
 
-        <!-- Dropoff Location -->
-        <div>
-          <label class="block font-medium">Dropoff location</label>
-          <div class="flex gap-2">
-            <label class="inline-flex items-center">
-              <input type="radio" value="manual" v-model="dropoffMode" />
-              <span class="ml-2">Manually add location</span>
-            </label>
-            <label class="inline-flex items-center">
-              <input type="radio" value="current" v-model="dropoffMode" />
-              <span class="ml-2">Use current location</span>
-            </label>
-            <label class="inline-flex items-center">
-              <input type="radio" value="list" v-model="dropoffMode" />
-              <span class="ml-2">Select from list</span>
-            </label>
-          </div>
-
-          <!-- Manual Input -->
-          <div v-if="dropoffMode === 'manual'" class="mt-4">
-            <input v-model="form.dropoffLocation" type="text" required class="mt-1 w-full border rounded" />
-          </div>
-
-          <!-- Current Location -->
-          <div v-if="dropoffMode === 'current'" class="mt-4">
-            <button type="button" @click="setCurrentLocation(true)"
-              class="bg-blue-100 text-blue-700 border border-blue-300 rounded px-3 py-1 text-sm">
-              Use my location
-            </button>
-            <p v-if="dropoffError" class="text-red-600 text-sm">Unable to retrieve location or same as pickup</p>
-          </div>
-
-          <!-- Select From List -->
-          <div v-if="dropoffMode === 'list'" class="mt-4">
-            <select v-model="form.dropoffLocation" required class="mt-1 w-full border rounded p-2">
-              <option disabled value="">Select location</option>
-              <option v-for="pin in pins" :key="pin.name" :value="pin.name">
-                {{ pin.name }}
-              </option>
-            </select>
-
-            <!-- only render the map once user has picked and modal is closed -->
-            <div v-if="form.dropoffLocation && !showModal" class="mt-4">
-              <LMap :zoom="11" :center="currentDropoffCoords" :options="mapOptions" style="height:250px;width:100%">
-                <LTileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                  attribution="&copy; OpenStreetMap contributors" />
-                <LMarker :lat-lng="currentDropoffCoords">
-                  <LPopup>{{ form.dropoffLocation }}</LPopup>
-                </LMarker>
-              </LMap>
+        <!-- Step 2: Pickup & Dropoff -->
+        <transition name="fade-up" mode="out-in">
+          <div v-if="currentStep === 2" class="space-y-6" key="step2">
+            <h3 class="text-lg font-semibold">Pickup & Dropoff</h3>
+            <!-- Pickup -->
+            <div>
+              <label class="block mb-1">Pickup location</label>
+              <div class="flex gap-4 mb-2">
+                <label class="inline-flex items-center">
+                  <input type="radio" v-model="pickupMode" value="manual" />
+                  <span class="ml-2">Manual</span>
+                </label>
+                <label class="inline-flex items-center">
+                  <input type="radio" v-model="pickupMode" value="current" />
+                  <span class="ml-2">Use my location</span>
+                </label>
+                <label class="inline-flex items-center">
+                  <input type="radio" v-model="pickupMode" value="list" />
+                  <span class="ml-2">Select from list</span>
+                </label>
+              </div>
+              <input
+                v-if="pickupMode === 'manual'"
+                v-model="form.pickupLocation"
+                type="text"
+                name ="pickupLocation"
+                required
+                class="w-full border rounded p-2 bg-[#2C2C2C]"
+              />
+              <button
+                v-if="pickupMode === 'current'"
+                type="button"
+                name ="pickupLocation"
+                @click="setCurrentLocation(false)"
+                class="px-3 py-1 bg-blue-100 text-blue-700 rounded"
+              >
+                Use my location
+              </button>
+              <select
+                v-if="pickupMode === 'list'"
+                v-model="form.pickupLocation"
+                required
+                name ="pickupLocation"
+                class="w-full border rounded p-2 bg-[#2C2C2C]"
+              >
+                <option disabled value="">Select location</option>
+                <option v-for="pin in pins" :key="pin.name" :value="pin.name">{{ pin.name }}</option>
+              </select>
+            </div>
+            <!-- Dropoff -->
+            <div>
+              <label class="block mb-1">Dropoff location</label>
+              <div class="flex gap-4 mb-2">
+                <label class="inline-flex items-center">
+                  <input type="radio" v-model="dropoffMode" value="manual" />
+                  <span class="ml-2">Manual</span>
+                </label>
+                <label class="inline-flex items-center">
+                  <input type="radio" v-model="dropoffMode" value="current" />
+                  <span class="ml-2">Use my location</span>
+                </label>
+                <label class="inline-flex items-center">
+                  <input type="radio" v-model="dropoffMode" value="list" />
+                  <span class="ml-2">Select from list</span>
+                </label>
+              </div>
+              <input
+                v-if="dropoffMode === 'manual'"
+                v-model="form.dropoffLocation"
+                type="text"
+                name ="dropoffLocation"
+                required
+                class="w-full border rounded p-2 bg-[#2C2C2C]"
+              />
+              <button
+                v-if="dropoffMode === 'current'"
+                type="button"
+                name ="dropoffLocation"
+                @click="setCurrentLocation(true)"
+                class="px-3 py-1 bg-blue-100 text-blue-700 rounded"
+              >
+                Use my location
+              </button>
+              <select
+                v-if="dropoffMode === 'list'"
+                v-model="form.dropoffLocation"
+                name ="dropoffLocation"
+                required
+                class="w-full border rounded p-2 bg-[#2C2C2C]"
+              >
+                <option disabled value="">Select location</option>
+                <option v-for="pin in pins" :key="pin.name" :value="pin.name">{{ pin.name }}</option>
+              </select>
             </div>
           </div>
-        </div>
+        </transition>
 
-        <!-- Submit Button -->
-        <button :disabled="!formValid" type="submit"
-          class="w-full bg-blue-600 text-white py-2 rounded disabled:opacity-50">
-          Request Booking
-        </button>
+        <!-- Step 3: Date, Time & Details -->
+        <transition name="fade-up" mode="out-in">
+          <div v-if="currentStep === 3" class="space-y-4" key="step3">
+            <h3 class="text-lg font-semibold">Date, Time & Number of Passengers</h3>
+            <input
+              type="date"
+              v-model="form.date"
+              name ="date"
+              :min="minDate"
+              required
+              class="w-full border rounded p-2 bg-[#2C2C2C]"
+            />
+            <input
+              type="time"
+              name="time"
+              v-model="form.time"
+              required
+              class="w-full border rounded p-2 bg-[#2C2C2C]"
+            />
+            <input
+              type="number"
+              name="number of people"
+              v-model.number="form.people"
+              min="1"
+              max="14"
+              required
+              class="w-full border rounded p-2 bg-[#2C2C2C]"
+              placeholder="Number of people"
+            />
+            <div v-if="form.type === 'transfer'" class="mt-4">
+              <label class="block mb-1">Number of Luggages</label>
+              <input type="number" v-model.number="form.luggage" min="0" max="10"
+                class="w-full border rounded p-2 bg-[#2C2C2C]" placeholder="Luggages" />
+            </div>
+            <textarea
+              v-if="form.type === 'tour' && form.tour === 'Custom Tour'"
+              v-model="form.customDescription"
+              name="customDescription"
+              required
+              rows="3"
+              class="w-full border rounded p-2 bg-[#2C2C2C]"
+              placeholder="Describe your custom tour..."
+            ></textarea>
+          </div>
+        </transition>
 
-        <!-- Confirmation Modal -->
-        <div v-if="showModal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-          <div class="bg-white p-6 rounded shadow-lg w-11/12 md:w-1/3">
-            <h3 class="text-xl font-semibold mb-4">Confirm your booking</h3>
-            <p><strong>Name:</strong> {{ form.name }} {{ form.surname }}</p>
-            <p><strong>Email:</strong> {{ form.email }}</p>
-            <p><strong>Phone:</strong> {{ form.phone }}</p>
-            <p><strong>Date:</strong> {{ form.date }}</p>
-            <p><strong>Time:</strong> {{ form.time }}</p>
-            <p><strong>People:</strong> {{ form.people }}</p>
-            <p><strong>Pickup:</strong> {{ form.pickupLocation }}</p>
-            <p><strong>Drop Off:</strong> {{ form.dropoffLocation }}</p>
-            <p v-if="pickupMode === 'list' && dropoffMode === 'list'">
-              <strong>Price (Prices may differ depending on):</strong> {{ price }}€
+        <!-- Step 4: Vehicle Selection -->
+        <transition name="fade-up" mode="out-in">
+          <div v-if="currentStep === 4 && form.people <= 8" class="space-y-4" key="step4">
+            <h3 class="text-lg font-semibold">Select Vehicle</h3>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div
+                v-for="v in vehicleOptions"
+                :key="v.name"
+                @click="form.vehicle = v.name"
+                :class="[
+                  'flex items-center p-4 rounded-lg cursor-pointer border',
+                  form.vehicle === v.name
+                    ? 'border-[#cba671] bg-[#2C2C2C]'
+                    : 'border-gray-700 hover:border-[#cba671]'
+                ]"
+              >
+                <img :src="v.image" :alt="v.name" class="w-20 h-20 object-cover rounded mr-4" />
+                <div>
+                  <h4 class="text-white font-semibold">{{ v.name }}</h4>
+                  <p class="text-gray-300 text-sm">Passenger Seats: {{ v.capacity }}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+        </transition>
+        <input
+            v-if="currentStep === 4 && form.people > 8"
+            type="hidden"
+            name="vehicle"
+            value="Peugeot 5008 + Mercedes Vito"
+            v-model="form.vehicle"
+          />
+        <!-- Step 5: Summary & Price -->
+        <transition name="fade-up" mode="out-in">
+          <div v-if="currentStep === 5" class="space-y-2" key="step5">
+            <h3 class="text-lg font-semibold">Summary & Price</h3>
+            <p><strong>Type:</strong> {{ form.type === 'tour' ? 'Private Tour' : 'Private Transfer' }}</p>
+            <p v-if="form.type === 'tour'">
+              <strong>Tour:</strong> {{ form.tour }}
             </p>
-            <div class="flex justify-end gap-4 mt-6">
-              <button type="button" @click="closeModal" class="px-4 py-2 border rounded">Cancel</button>
-              <button type="button" @click="submitForm"
-                class="px-4 py-2 bg-blue-600 text-white rounded">Confirm</button>
-            </div>
+            <p v-else>
+              <strong>Route:</strong> {{ form.pickupLocation }} → {{ form.dropoffLocation }}
+            </p>
+            <p><strong>Date/Time:</strong> {{ form.date }} at {{ form.time }}</p>
+            <p><strong>People:</strong> {{ form.people }}</p>
+            <p v-if="form.type === 'tour' && form.tour === 'Custom Tour'">
+              <strong>Details:</strong> {{ form.customDescription }}
+            </p>
+            <p v-if="form.type === 'transfer'">
+              <strong>Luggages:</strong> {{ form.luggage }}
+            </p>
+            <p v-if="form.people <= 8">
+              <strong>Vehicle:</strong> {{ form.vehicle }}
+            </p>
+            <p v-else>
+              <strong>Vehicles:</strong> Peugeot 5008 + Mercedes Vito
+            </p>
+            <p v-if="totalPrice !== null" class="mt-4 text-xl font-bold">Total: {{ totalPrice }}€</p>
+            <p v-else class="mt-4 text-red-500">We will contact you to confirm the price.</p>
           </div>
+        </transition>
+        
+        <!-- Step 6: User Info -->
+        <transition name="fade-up" mode="out-in">
+          <div v-if="currentStep === 6" class="space-y-4" key="step6">
+            <h3 class="text-lg font-semibold">Your Information</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <input
+                v-model="form.name"
+                name="name"
+                type="text"
+                placeholder="Name"
+                required
+                class="w-full border rounded p-2 bg-[#2C2C2C]"
+              />
+              <input
+                v-model="form.surname"
+                name="surname"
+                type="text"
+                placeholder="Surname"
+                required
+                class="w-full border rounded p-2 bg-[#2C2C2C]"
+              />
+              <input
+                v-model="form.email"
+                name="email"
+                type="email"
+                placeholder="Email"
+                required
+                class="w-full border rounded p-2 bg-[#2C2C2C]"
+              />
+               <vue-tel-input
+                v-model="form.phone"
+                name="phone"
+                mode="international"
+                validCharactersOnly
+                :invalidMsg="'Please enter a valid number'"
+                class="w-full border rounded p-2 bg-[#2C2C2C]"
+                required
+              >
+              </vue-tel-input>
+              <input
+                v-model="form.idNumber"
+                name="idNumber"
+                type="text"
+                placeholder="ID/Passport"
+                required
+                class="w-full border rounded p-2 bg-[#2C2C2C] md:col-span-2"
+              />
+             
+              <input
+                type="hidden"
+                name="price"
+                :value="totalPrice"/>
+            </div>
+            
+          </div>
+        </transition>
+
+        <!-- Navigation Buttons -->
+        <div class="flex justify-between mt-6">
+          <button
+            v-if="currentStep > 1"
+            type="button"
+            class="px-4 py-2 border border-gray-600 rounded hover:border-[#cba671]"
+            @click="prevStep"
+          >
+            Back
+          </button>
+          <div></div>
+          <button
+            v-if="currentStep < finalStep"
+            type="button"
+            class="px-4 py-2 bg-[#cba671] text-[#232436] rounded hover:bg-[#B4952E] disabled:opacity-50"
+            @click="nextStep"
+            :disabled="!canProceed"
+          >
+            Next
+          </button>
+          <button
+            v-else
+            type="submit"
+            class="px-4 py-2 bg-green-600 text-white rounded w-full hover:bg-green-700 disabled:opacity-50"
+          >
+            Submit Booking Request
+          </button>
         </div>
       </form>
     </section>
 
-    <!-- Right Column: Alternative Contact -->
-    <section class="w-full lg:w-1/2 bg-gray-50 p-6 rounded shadow">
-      <h2 class="text-2xl font-semibold mb-4">Other ways to get in touch</h2>
-      <div class="space-y-4">
-        <p>Call or WhatsApp:</p>
-        <a href="tel:+302284082379" class="block text-blue-600">+30 698 091 1843</a>
-        <p>Email:</p>
-        <a href="mailto:info@expresstransferparos.com" class="block text-blue-600">info@expresstransferparos.com</a>
-      </div>
+    <!-- Wedding & Disposal Inquiry Section -->
+    <section class="max-w-2xl mx-auto bg-white rounded-lg shadow p-6">
+      <h2 class="text-2xl font-semibold mb-6 text-center">Request Wedding or Disposal Service</h2>
+      <form
+        method="POST"
+        action="https://formspree.io/f/xyzwaywk"
+        class="space-y-4"
+        @submit.prevent="submitInquiry"
+      >
+        <div>
+          <label class="block font-medium mb-1">Service Type</label>
+          <select
+            name="serviceType"
+            v-model="inquiry.serviceType"
+            required
+            class="mt-1 w-full border rounded p-2"
+          >
+            <option disabled value="">Select service</option>
+            <option value="wedding">Wedding Service</option>
+            <option value="disposal">Disposal Service</option>
+          </select>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label class="block font-medium mb-1">First Name</label>
+            <input
+              name="firstName"
+              v-model="inquiry.firstName"
+              type="text"
+              required
+              class="mt-1 w-full border rounded p-2"
+            />
+          </div>
+          <div>
+            <label class="block font-medium mb-1">Surname</label>
+            <input
+              name="surname"
+              v-model="inquiry.surname"
+              type="text"
+              required
+              class="mt-1 w-full border rounded p-2"
+            />
+          </div>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label class="block font-medium mb-1">Email</label>
+            <input
+              name="email"
+              v-model="inquiry.email"
+              type="email"
+              required
+              class="mt-1 w-full border rounded p-2"
+            />
+          </div>
+          <div>
+            <label class="block font-medium mb-1">Phone</label>
+            <vue-tel-input
+              name="phone"
+              v-model="inquiry.phone"
+              mode="international"
+              validCharactersOnly
+              :invalidMsg="'Please enter a valid number'"
+              class="mt-1 w-full"
+              required
+            >
+            </vue-tel-input>
+          </div>
+      
+        </div>
+        
+        <div>
+          <label class="block font-medium mb-1">Details</label>
+          <textarea
+            name="details"
+            v-model="inquiry.details"
+            rows="5"
+            required
+            class="mt-1 w-full border rounded p-2"
+            placeholder="Describe your request..."
+          ></textarea>
+        </div>
+        <button
+          type="submit"
+          class="w-full bg-[#d9b16b] text-white px-6 py-2 rounded-lg font-semibold hover:bg-[#b4952e] transition-colors disabled:opacity-50"
+          :disabled="!inquiryValid"
+        >
+          Submit Request
+        </button>
+      </form>
     </section>
   </div>
 </template>
 
 <script setup>
-import 'leaflet/dist/leaflet.css';
-import { ref, computed, watch } from 'vue';
-import { LMap, LTileLayer, LMarker, LPopup } from '@vue-leaflet/vue-leaflet';
+import { ref, reactive, computed } from 'vue';
+
+import vitoImage from '../assets/etp_vito_modal.png';
+import peugeotImage from '../assets/etp_5008_modal.png';
+const bookingForm = ref(null);
+// Steps
+const currentStep = ref(1);
+const finalStep = 6;
+const tours = [
+  'History Tour ~4h',
+  'Half Day Island Tour ~4h',
+  'Full Day Island Tour ~8h',
+  'Beaches Exploration ~9h',
+  'Custom Tour',
+];
 
 // Form state
-const form = ref({
-  name: '', surname: '', email: '', phone: '', date: '', time: '', people: 1,
-  pickupLocation: '', dropoffLocation: '', price: 0
+const form = reactive({
+  type: '',
+  tour: '',
+  pickupLocation: '',
+  dropoffLocation: '',
+  date: '',
+  time: '',
+  people: 1,
+  luggage: 0,
+  customDescription: '',
+  vehicle: '',
+  name: '',
+  surname: '',
+  email: '',
+  phone: '',
+  idNumber: '',
+  price: 0
 });
-const pickupMode = ref('manual');
-const dropoffMode = ref('manual');
-const showModal = ref(false);
-const dateError = ref(false);
-const pickupError = ref(false);
-const dropoffError = ref(false);
-const bookingForm = ref(null);
-const minDate = computed(() => {
-  return new Date().toISOString().split('T')[0]
-})
 
-// Price tables for Naousa pickup
+// Locations & pricing
 const priceTables = {
   Parikia: {
     Naousa: { '1-4': 36, '5-8': 50 },
@@ -330,8 +574,6 @@ const priceTables = {
     Monastiri: { '1-4': 36, '5-8': 50 }
   }
 };
-
-// Map pins
 const pins = [
   { name: 'Parikia', coords: [37.0857, 25.1512] },
   { name: 'Naousa', coords: [37.1236, 25.2387] },
@@ -345,91 +587,145 @@ const pins = [
   { name: 'SantaMaria - Ampelas', coords: [37.1032, 25.2651] }
 ];
 
-const mapOptions = { scrollWheelZoom: false, dragging: true };
-const defaultCenter = [37.1236, 25.2387];
+const pickupMode = ref('manual');
+const dropoffMode = ref('manual');
+function setCurrentLocation(isDropoff) {
+  navigator.geolocation.getCurrentPosition((pos) => {
+    const coords = `${pos.coords.latitude.toFixed(5)}, ${pos.coords.longitude.toFixed(5)}`;
+    isDropoff ? (form.dropoffLocation = coords) : (form.pickupLocation = coords);
+  });
+}
 
-const submitForm = () => {
-  if (formValid.value) {
-    bookingForm.value.submit();
-  } else {
-    alert('Please fill in all required fields correctly.');
-  }
-};
-// Computed coords for previews
-const currentPickupCoords = computed(() => {
-  const pin = pins.find(p => p.name === form.value.pickupLocation);
-  return pin ? pin.coords : defaultCenter;
+const minDate = computed(() => new Date().toISOString().split('T')[0]);
+
+// Vehicle options
+const vehicleOptions = computed(() => {
+  const opts = [];
+  if (form.people <= 6) opts.push({ name: 'Peugeot 5008', capacity: 6, image: peugeotImage });
+  if (form.people <= 8) opts.push({ name: 'Mercedes Vito', capacity: 8, image: vitoImage });
+  return opts;
 });
-const currentDropoffCoords = computed(() => {
-  const pin = pins.find(p => p.name === form.value.dropoffLocation);
-  return pin ? pin.coords : defaultCenter;
-});
 
-// Price calculation
-const price = computed(() => {
-  // normalize Ampelas to SantaMaria - Ampelas
-  let puRaw = form.value.pickupLocation;
-  let doffRaw = form.value.dropoffLocation;
-  const pu = puRaw === 'Ampelas' ? 'SantaMaria - Ampelas' : puRaw;
-  const doff = doffRaw === 'Ampelas' ? 'SantaMaria - Ampelas' : doffRaw;
-
-  // attempt direct lookup
-  const originRates = priceTables[pu] || {};
-  let destRates = originRates[doff];
-  // fallback to reverse if missing
-  if (!destRates && priceTables[doff]) {
-    destRates = priceTables[doff][pu];
-  }
-  if (!destRates) return null;
-
-  const bracket = form.value.people <= 4 ? '1-4' : '5-8';
-  let p = destRates[bracket];
-  // surcharge for early hours
-  const hour = form.value.time ? +form.value.time.split(':')[0] : 0;
-  if (hour >= 0 && hour < 6) p += 15;
+// Price calculations
+const transferPrice = computed(() => {
+  // normalize names if you need to
+  const pu = form.pickupLocation;
+  const doff = form.dropoffLocation;
+  const origin = priceTables[pu] || {};
+  let rates = origin[doff] || (priceTables[doff] && priceTables[doff][pu]);
+  if (!rates) return null;
+  const bracket = form.people <= 4 ? '1-4' : '5-8';
+  let p = rates[bracket];
+  // early-morning surcharge
+  const h = +form.time?.split(':')[0] || 0;
+  if (h < 6) p += 15;
   return p;
 });
-// Watch date for past selection
-watch(() => form.value.date, val => {
-  const today = new Date().toISOString().split('T')[0];
-  dateError.value = val < today;
+const totalPrice = computed(() => {
+  if (form.type === 'tour' && form.tour !== 'Custom Tour') {
+    const hours = form.tour.includes('4h') ? 4 : form.tour.includes('8h') ? 8 : 9;
+    // combine for >9 people or both vehicles
+    if (form.people > 8 || form.vehicle.includes('+')) {
+      const p1 = hours === 4 ? 200 : hours === 8 ? 350 : 400;
+      const p2 = hours === 4 ? 300 : hours === 8 ? 500 : 550;
+      return p1 + p2;
+    } else if (form.vehicle === 'Peugeot 5008') {
+      return hours === 4 ? 200 : hours === 8 ? 350 : 400;
+    } else if (form.vehicle === 'Mercedes Vito') {
+      
+      return hours === 4 ? 300 : hours === 8 ? 500 : 550;
+    }
+    return null;
+  } else if (form.type === 'transfer') {
+    return (pickupMode.value === 'list' && dropoffMode.value === 'list' && form.people <= 8)
+      ? transferPrice.value
+      : null;
+  }
+  return null;
 });
 
-// Form validity
-const formValid = computed(() =>
-  form.value.name && form.value.surname && form.value.email && form.value.phone &&
-  form.value.date && form.value.time && form.value.people >= 1 &&
-  form.value.pickupLocation && form.value.dropoffLocation && !dateError.value
-);
+// Navigation
+const canProceed = computed(() => {
+  switch (currentStep.value) {
+    case 1:
+      return form.type === 'tour' ? !!form.tour : form.type === 'transfer';
+    case 2:
+      return form.pickupLocation && form.dropoffLocation;
+    case 3:
+      return form.date && form.time && form.people >= 1 && (form.type === 'tour' && form.tour === 'Custom Tour' ? form.customDescription : true);
+    case 4:
+      return form.people > 8 || !!form.vehicle;
+    default:
+      return true;
+  }
+});
 
-function openModal() {
-  showModal.value = true;
-}
-function closeModal() {
-  showModal.value = false;
-}
 
-// Geolocation helper
-function setCurrentLocation(isDropoff) {
-  navigator.geolocation.getCurrentPosition(
-    pos => {
-      const coords = `${pos.coords.latitude.toFixed(5)}, ${pos.coords.longitude.toFixed(5)}`;
-      if (isDropoff) {
-        form.value.dropoffLocation = coords;
-        dropoffError.value = false;
-      } else {
-        form.value.pickupLocation = coords;
-        pickupError.value = false;
-      }
-    },
-    () => {
-      if (isDropoff) dropoffError.value = true;
-      else pickupError.value = true;
+ const formValid  = computed(() => Object.values(form).every((v) => v));
+
+function nextStep() {
+  if (canProceed.value && currentStep.value < finalStep) {
+    if (form.people > 8 && currentStep.value === 3) {
+      form.vehicle = 'Peugeot 5008 + Mercedes Vito';
+      currentStep.value = 5;
+    } else {
+      currentStep.value++;
     }
-  );
+    if(currentStep.value === 5){
+      form.price = totalPrice.value;
+    }
+  };
+}
+function prevStep() {
+  if (currentStep.value > 1) {
+    if (form.people > 8 && currentStep.value === 5) {
+      form.vehicle = '';
+      currentStep.value = 3;
+    } else {
+      currentStep.value--;
+    }
+    if(currentStep.value === 5) {
+      form.price = totalPrice.value;
+    }
+  }
+}
+
+// Submit handlers
+function submitBooking() {
+  
+  let f = document.querySelectorAll('section')[0].querySelector('form')
+  Array.from(f.children).forEach(child => {
+    if (child.tagName.toLowerCase() !== 'input') {
+      f.removeChild(child);
+    }
+  });
+  f.submit();
+  
+}
+
+
+const inquiry = reactive({ serviceType: '', firstName: '', surname: '', email: '', phone: '', details: '' });
+const inquiryValid = computed(() => Object.values(inquiry).every((v) => v));
+function submitInquiry() {
+  if (inquiryValid.value) {
+    document.querySelectorAll('section')[1].querySelector('form').submit();
+  }
 }
 </script>
 
 <style scoped>
-/* No additional styles */
+.fade-up-enter-active,
+.fade-up-leave-active {
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+.fade-up-enter-from,
+.fade-up-leave-to {
+  opacity: 0;
+  transform: translateY(20px);
+}
+.fade-up-enter-to,
+.fade-up-leave-from {
+  opacity: 1;
+  transform: translateY(0);
+}
 </style>

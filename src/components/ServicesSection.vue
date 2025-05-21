@@ -1,6 +1,6 @@
 <template>
   <section class="services-section">
-    <h1 class="text-3xl sm:text-4xl md:text-6xl font-bold text-gray-800 text-center "> Popular destinations in Paros</h1>
+    <h1 class="text-3xl sm:text-4xl md:text-6xl font-bold text-gray-800 text-center">Our popular Services:</h1>
     <div class="carousel-container">
       <div class="carousel">
         <button class="carousel__nav carousel__nav--prev" @click="prev">‹</button>
@@ -31,6 +31,10 @@
         {{ descriptions[tabs[activeIndex].id] }}
       </p>
 
+      <router-link class="learn-more-button" :to="`/tours/${tabs[activeIndex].id}`">
+        Learn More
+      </router-link>
+
       <!-- Zoom modal -->
       <div v-if="isModalOpen" class="modal" @click.self="closeModal">
         <div class="modal__content">
@@ -49,41 +53,35 @@
 <script>
 import alykiImage from '../assets/etp-alyki.jpg';
 import ampelasImage from '../assets/etp-ampelas.jpg';
-import driosImage from '../assets/etp-drios.jpg';
-import logarasImage from '../assets/etp-logaras.jpg';
-import naousaImage from '../assets/etp-naousa.jpg';
-import parikiaImage from '../assets/etp-parikia.jpg';
+import beachTourImage from '../assets/etp-drios.jpg';
+import halfDayTourImage from '../assets/etp-naousa.jpg';
+import historyTourImage from '../assets/etp-history-tour.jpg';
+import fullDayTourImage from '../assets/etp-fullday-tour.jpeg';
 
 export default {
-  name: 'PricingCarousel',
+  name: 'TourCarousel',
   data() {
     return {
       tabs: [
-        { id: 'alyki', label: 'Alyki' },
-        { id: 'ampelas', label: 'Ampelas' },
-        { id: 'drios', label: 'Drios – Golden Beach' },
-        { id: 'logaras', label: 'Logaras' },
-        { id: 'naousa', label: 'Naousa' },
-        { id: 'parikia', label: 'Parikia' }
+        { id: 'history-tour', label: 'History Tour – 4 Hours' },
+        { id: 'beach-tour', label: 'Beach Tour – 9 Hours' },
+        { id: 'half-day-island-tour', label: 'Half-Day Island Tour – 4 Hours' },
+        { id: 'full-day-island-tour', label: 'Full-Day Island Tour – 8 Hours' }
       ],
       descriptions: {
-        alyki: 'Alyki is a charming fishing village known for its salt pans and traditional Greek tavernas by the sea.',
-        ampelas: 'Ampelas features a sandy bay lined with olive trees and quiet beachfronts ideal for relaxing.',
-        drios: 'Drios – Golden Beach is a popular resort area with golden sands and clear blue waters perfect for water sports.',
-        logaras: 'Logaras is a seaside village offering sheltered beaches and picturesque coastal views.',
-        naousa: 'Naousa is a picturesque fishing port famous for its waterfront restaurants and Venetian harbor.',
-        parikia: 'Parikia, the capital of Paros, boasts a historic old town with whitewashed houses and the iconic Panagia Ekatontapiliani church.'
+        'history-tour': `Begin in Parikia, exploring the Archaeological Museum with its ancient artifacts before visiting the early Christian wonders of Panagia Ekatontapyliani. Next, head to Alyki to see the Cycladic Folklore Museum’s intricate ship models and learn about the island’s maritime heritage. In Marpissa, the Museum of Sculpture showcases local artist Nikos Perantinos and Paros’s rich connection to marble artistry. Then venture inland to Lefkes, wandering its winding alleys and admiring traditional Cycladic architecture in this serene mountain village. Finally, conclude at Paros Park’s monastery, where coastal trails and a hike to Cape Korakas reveal stunning Aegean vistas.`,
+        'beach-tour': `Embark on a sun-soaked journey to seven of Paros’s most stunning beaches, starting with the tranquil cove of Faragas Beach for a peaceful morning swim. Continue to lively Golden Beach, where golden sands and windsurfers create a vibrant coastal scene. Next, experience the natural clay cliffs of Kalogeros Beach, perfect for a unique skincare mask and refreshing dip. Then head to Santa Maria near Naoussa to soak up the energetic atmosphere before exploring the granite formations and hidden pools of Kolymbithres Beach. Conclude at the calm shores of Monastiri in Paros Park and Krios Beach near Parikia, capturing the island’s diverse seaside beauty and panoramic views.`,
+        'half-day-island-tour': `Begin in the quaint fishing village of Alyki, strolling its harbor and soaking up the authentic Cycladic atmosphere. Continue to Golden Beach to admire its famous golden sands and crystal-clear waters, stopping for photos or a quick shore walk. Then visit the seaside settlements of Piso Livadi and Logaras for a glimpse of local fishing life and a beachside coffee break. Pause at the hilltop Agios Antonios Monastery above Marpissa for panoramic island and sea views and a peaceful wander. Finish your half-day journey exploring the charming mountain village of Lefkes before choosing to conclude in either stylish Naoussa or historic Parikia.`,
+        'full-day-island-tour': `Your full-day adventure starts in the charming fishing harbor of Alyki, where you’ll enjoy a leisurely stroll amid traditional boats and coastal scenery. Next, relax on either Golden Beach or the secluded Faragas Beach for a two-hour swim and sunbathe in their pristine waters. The tour continues along the east coast to Piso Livadi for a seaside coffee, followed by a visit to the hilltop Agios Antonios Monastery with its breathtaking island vistas. After lunch in the marble-paved alleys of Lefkes, explore the vibrant harbor town of Naoussa, famed for its boutiques, art galleries, and seaside cafés. Finally, unwind with a coastal walk at Monastiri in Paros Park before your return, taking in serene landscapes and a memorable sunset.`
+      },
+      images: {
+        'history-tour': historyTourImage,
+        'beach-tour': beachTourImage,
+        'half-day-island-tour': halfDayTourImage,
+        'full-day-island-tour': fullDayTourImage
       },
       activeIndex: 0,
-      isModalOpen: false,
-      images: {
-        alyki: alykiImage,
-        ampelas: ampelasImage,
-        drios: driosImage,
-        logaras: logarasImage,
-        naousa: naousaImage,
-        parikia: parikiaImage
-      }
+      isModalOpen: false
     };
   },
   computed: {
@@ -276,5 +274,15 @@ export default {
     max-width: 90%;
     font-size: 0.9rem;
   }
+}
+.learn-more-button {
+  display: inline-block;
+  margin-top: 1rem;
+  padding: 0.75rem 1.5rem;
+  background-color: #d9b16b;
+  color: white;
+  border-radius: 0.5rem;
+  text-decoration: none;
+  font-weight: bold;
 }
 </style>
