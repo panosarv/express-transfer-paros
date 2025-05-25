@@ -2,7 +2,7 @@
   <div class="py-16 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-[#232436] to-[#2C2C2C] text-white" id="contact">
     <div class="max-w-7xl mx-auto text-center mb-8">
       <h2 class="text-xl tracking-widest uppercase text-[#cba671] font-theme-heading mb-2">
-        Ready to explore Paros with us?
+        Last Minute Bookings
       </h2>
       <p class="text-white mb-6">
         Choose any of the methods below to contact Express Transfer Paros:

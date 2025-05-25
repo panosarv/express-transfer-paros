@@ -39,10 +39,7 @@
           enter-to-class="opacity-100 translate-y-0"
         >
           <p class="text-lg sm:text-xl md:text-2xl text-[#E5E5E5] mb-8 text-justify md:text-justify">
-            Express Transfer Paros is dedicated to providing a seamless and comfortable travel
-            experience across Paros. With a focus on security, reliability, and customer satisfaction,
-            our professional drivers ensure a stress-free journey. Whether you're heading to the
-            airport, a hotel, or a scenic destination, you can trust us for a premium transfer service tailored to your needs.
+            We provide a seamless and reliable experience from the moment you arrive. From airport and port pickups to full-day private drivers, island tours, weddings, bachelor parties and more, every ride is tailored to your needs, with professional service that reflects the warmth and hospitality of Paros.
           </p>
         </Transition>
 
