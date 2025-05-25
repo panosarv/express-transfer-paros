@@ -71,7 +71,6 @@
 </template>
 
 <script>
-import GoogleReviews from './GoogleReviews.vue';
 
 export default {
   name: 'TeamSection',
