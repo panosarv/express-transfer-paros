@@ -6,6 +6,7 @@
         src="../../assets/etp-private.jpg"
         alt="Private Transfers"
         class="w-full h-96 object-cover"
+        loading="lazy"
       />
       <div class="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center">
         <h1 class="text-white text-5xl font-bold">Private Transfers</h1>

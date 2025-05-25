@@ -38,7 +38,7 @@ onUnmounted(() => {
           :class="{ 'text-black': isAtTop && isWhiteBackgroundPage }"
           style="font-family: 'Poppins', sans-serif;"
         >
-          <img src="/src/assets/etp-logo.png" alt="Express Transfer Paros Logo" class="h-20 w-auto transition-all duration-300" />
+          <img src="/src/assets/etp-logo.png" alt="Express Transfer Paros Logo" class="h-20 w-auto transition-all duration-300" loading="lazy" />
         </RouterLink>
 
         <!-- Desktop Menu -->

@@ -1,7 +1,7 @@
 <template>
   <section class="tour-detail">
     <h1 class="tour-title">{{ tour.title }}</h1>
-    <img :src="tour.image" :alt="tour.title" class="tour-image" />
+    <img :src="tour.image" :alt="tour.title" class="tour-image" loading="lazy"/>
 
     <ul class="tour-features">
       <li v-for="(feature, index) in tour.features" :key="index">✔ {{ feature }}</li>
@@ -12,7 +12,7 @@
         <details class="tour-step">
           <summary>{{ step.title }}</summary>
           <div class="step-content">
-            <img :src="step.image" :alt="step.title" class="step-image" />
+            <img :src="step.image" :alt="step.title" class="step-image" loading="lazy"/>
             <p>{{ step.description }}</p>
           </div>
         </details>

@@ -18,6 +18,7 @@ import MeetTheTeam from '../components/MeetTheTeam.vue'
           src="../assets/etp-meetteam.jpg"
           class="w-full h-full object-cover"
           alt="Paros background"
+          loading="lazy"
         />
         <div class="absolute inset-0 bg-[#232436]/70 backdrop-blur-sm"></div>
       </div>

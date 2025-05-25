@@ -294,7 +294,7 @@
                     : 'border-gray-700 hover:border-[#cba671]'
                 ]"
               >
-                <img :src="v.image" :alt="v.name" class="w-20 h-20 object-cover rounded mr-4" />
+                <img :src="v.image" :alt="v.name" class="w-20 h-20 object-cover rounded mr-4" loading="lazy" />
                 <div>
                   <h4 class="text-white font-semibold">{{ v.name }}</h4>
                   <p class="text-gray-300 text-sm">Passenger Seats: {{ v.capacity }}</p>

@@ -6,6 +6,7 @@
         src="https://images.unsplash.com/photo-1511285560929-80b456fea0bc?q=80&w=2669&auto=format&fit=crop"
         alt="Wedding Transfers"
         class="w-full h-96 object-cover"
+        loading="lazy"
       />
       <div class="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center">
         <h1 class="text-white text-5xl font-bold">Wedding Services</h1>

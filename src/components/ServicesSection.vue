@@ -43,6 +43,7 @@
             :src="images[tabs[activeIndex].id]"
             :alt="tabs[activeIndex].label + ' zoomed'"
             class="modal__img"
+            loading="lazy"
           />
         </div>
       </div>

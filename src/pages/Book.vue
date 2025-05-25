@@ -10,6 +10,7 @@ import BookingForm from '../components/BookingForm.vue'
                 src="../assets/etp-meetteam.jpg"
                 class="w-full h-full object-cover"
                 alt="Safari Background"
+                loading="lazy"
             />
             <div class="absolute inset-0 bg-[#232436]/70 backdrop-blur-sm"></div>
         </div>

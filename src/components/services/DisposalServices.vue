@@ -6,6 +6,7 @@
         src="https://images.unsplash.com/photo-1608340173100-5e36d2a76e91?q=80&w=2400&auto=format&fit=crop"
         alt="Disposal Services"
         class="w-full h-96 object-cover"
+        loading="lazy"
       />
       <div class="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center">
         <h1 class="text-white text-5xl font-bold">Disposal Services</h1>
