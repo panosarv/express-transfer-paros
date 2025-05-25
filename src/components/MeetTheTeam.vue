@@ -74,9 +74,7 @@
 
 export default {
   name: 'TeamSection',
-  components: {
-    GoogleReviews
-  },
+  
   data() {
     return {
       teamDescription:
