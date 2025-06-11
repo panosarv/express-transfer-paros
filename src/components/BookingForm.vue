@@ -468,7 +468,7 @@ const priceTables = {
   Parikia: {
     Naousa: { '1-4': 36, '5-8': 50 },
     Monastiri: { '1-4': 40, '5-8': 55 },
-    'Aerodromio - Alyki': { '1-4': 40, '5-8': 55 },
+    'Airport - Alyki': { '1-4': 40, '5-8': 55 },
     'Drios - ΧΑ': { '1-4': 50, '5-8': 65 },
     Lefkes: { '1-4': 45, '5-8': 60 },
     'Piso Livadi': { '1-4': 50, '5-8': 65 },
@@ -480,7 +480,7 @@ const priceTables = {
   Naousa: {
     Parikia: { '1-4': 36, '5-8': 50 },
     Monastiri: { '1-4': 36, '5-8': 45 },
-    'Aerodromio - Alyki': { '1-4': 50, '5-8': 65 },
+    'Airport - Alyki': { '1-4': 50, '5-8': 65 },
     'Drios - ΧΑ': { '1-4': 45, '5-8': 60 },
     Lefkes: { '1-4': 40, '5-8': 55 },
     'Piso Livadi': { '1-4': 40, '5-8': 55 },
@@ -493,7 +493,7 @@ const priceTables = {
     Parikia: { '1-4': 45, '5-8': 60 },
     Naousa: { '1-4': 36, '5-8': 45 },
     Monastiri: { '1-4': 40, '5-8': 55 },
-    'Aerodromio - Alyki': { '1-4': 55, '5-8': 70 },
+    'Airport - Alyki': { '1-4': 55, '5-8': 70 },
     'Drios - ΧΑ': { '1-4': 45, '5-8': 60 },
     Lefkes: { '1-4': 40, '5-8': 55 },
     'Piso Livadi': { '1-4': 40, '5-8': 55 },
@@ -505,7 +505,7 @@ const priceTables = {
     Parikia: { '1-4': 50, '5-8': 65 },
     Naousa: { '1-4': 45, '5-8': 60 },
     Monastiri: { '1-4': 50, '5-8': 65 },
-    'Aerodromio - Alyki': { '1-4': 45, '5-8': 60 },
+    'Airport - Alyki': { '1-4': 45, '5-8': 60 },
     Lefkes: { '1-4': 45, '5-8': 60 },
     'Piso Livadi': { '1-4': 40, '5-8': 55 },
     Pounta: { '1-4': 50, '5-8': 65 },
@@ -513,7 +513,7 @@ const priceTables = {
     'SantaMaria - Ampelas': { '1-4': 50, '5-8': 65 },
     'Drios - ΧΑ': { '1-4': 36, '5-8': 50 }
   },
-  'Aerodromio - Alyki': {
+  'Airport - Alyki': {
     Parikia: { '1-4': 40, '5-8': 55 },
     Naousa: { '1-4': 50, '5-8': 65 },
     Monastiri: { '1-4': 50, '5-8': 65 },
@@ -523,13 +523,13 @@ const priceTables = {
     Pounta: { '1-4': 36, '5-8': 50 },
     'Krios - cabana': { '1-4': 45, '5-8': 60 },
     'SantaMaria - Ampelas': { '1-4': 55, '5-8': 70 },
-    'Aerodromio - Alyki': { '1-4': 36, '5-8': 50 }
+    'Airport - Alyki': { '1-4': 36, '5-8': 50 }
   },
   Lefkes: {
     Parikia: { '1-4': 45, '5-8': 60 },
     Naousa: { '1-4': 40, '5-8': 55 },
     Monastiri: { '1-4': 45, '5-8': 60 },
-    'Aerodromio - Alyki': { '1-4': 50, '5-8': 65 },
+    'Airport - Alyki': { '1-4': 50, '5-8': 65 },
     'Drios - ΧΑ': { '1-4': 45, '5-8': 60 },
     'Piso Livadi': { '1-4': 45, '5-8': 60 },
     Pounta: { '1-4': 50, '5-8': 65 },
@@ -541,7 +541,7 @@ const priceTables = {
     Parikia: { '1-4': 50, '5-8': 65 },
     Naousa: { '1-4': 40, '5-8': 55 },
     Monastiri: { '1-4': 45, '5-8': 60 },
-    'Aerodromio - Alyki': { '1-4': 50, '5-8': 65 },
+    'Airport - Alyki': { '1-4': 50, '5-8': 65 },
     'Drios - ΧΑ': { '1-4': 45, '5-8': 60 },
     Lefkes: { '1-4': 45, '5-8': 60 },
     Pounta: { '1-4': 50, '5-8': 65 },
@@ -553,7 +553,7 @@ const priceTables = {
     Parikia: { '1-4': 36, '5-8': 50 },
     Naousa: { '1-4': 45, '5-8': 60 },
     Monastiri: { '1-4': 36, '5-8': 50 },
-    'Aerodromio - Alyki': { '1-4': 45, '5-8': 60 },
+    'Airport - Alyki': { '1-4': 45, '5-8': 60 },
     'Drios - ΧΑ': { '1-4': 55, '5-8': 70 },
     Lefkes: { '1-4': 50, '5-8': 65 },
     'Piso Livadi': { '1-4': 55, '5-8': 70 },
@@ -564,7 +564,7 @@ const priceTables = {
   Monastiri: {
     Parikia: { '1-4': 40, '5-8': 55 },
     Naousa: { '1-4': 36, '5-8': 45 },
-    'Aerodromio - Alyki': { '1-4': 50, '5-8': 65 },
+    'Airport - Alyki': { '1-4': 50, '5-8': 65 },
     'Drios - ΧΑ': { '1-4': 50, '5-8': 65 },
     Lefkes: { '1-4': 45, '5-8': 60 },
     'Piso Livadi': { '1-4': 40, '5-8': 55 },
@@ -578,7 +578,7 @@ const pins = [
   { name: 'Parikia', coords: [37.0857, 25.1512] },
   { name: 'Naousa', coords: [37.1236, 25.2387] },
   { name: 'Monastiri', coords: [37.1464, 25.2244] },
-  { name: 'Aerodromio - Alyki', coords: [37.0220, 25.1152] },
+  { name: 'Airport - Alyki', coords: [37.0220, 25.1152] },
   { name: 'Drios - ΧΑ', coords: [37.0040, 25.2237] },
   { name: 'Lefkes', coords: [37.0557, 25.2079] },
   { name: 'Piso Livadi', coords: [37.03555, 25.25963] },
