@@ -614,7 +614,7 @@ const transferPrice = computed(() => {
   const origin = priceTables[pu] || {};
   let rates = origin[doff] || (priceTables[doff] && priceTables[doff][pu]);
   if (!rates) return null;
-  const bracket = form.people <= 4 ? '1-4' : '5-8';
+  const bracket = form.vehicle==='Peugeot 5008'? form.people <= 4 ? '1-4' : '5-8': '5-8';
   let p = rates[bracket];
   // early-morning surcharge
   const h = +form.time?.split(':')[0] || 0;
