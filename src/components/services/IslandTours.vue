@@ -2,12 +2,8 @@
   <section class="island-tours">
     <!-- Hero Image -->
     <div class="relative">
-      <img
-        src="https://images.unsplash.com/photo-1666376466806-f4bcedffe0d6?q=80&w=2670&auto=format&fit=crop"
-        alt="Island Tours"
-        class="w-full h-96 object-cover"
-        loading="lazy"
-      />
+      <img src="https://images.unsplash.com/photo-1666376466806-f4bcedffe0d6?q=80&w=2670&auto=format&fit=crop"
+        alt="Island Tours" class="w-full h-96 object-cover" loading="lazy" />
       <div class="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center">
         <h1 class="text-white text-5xl font-bold">Island Tours</h1>
       </div>
@@ -15,22 +11,18 @@
 
     <div class="max-w-4xl mx-auto py-12 px-4">
       <p class="text-gray-700 leading-relaxed mb-6 text-justify">
-        Explore the highlights of Paros with our guided island tours. Choose from half-day, full-day, or custom itineraries that include historical sites, scenic villages, and hidden beaches.
+        Explore the highlights of Paros with our guided island tours. Choose from half-day, full-day, or custom
+        itineraries that include historical sites, scenic villages, and hidden beaches.
       </p>
 
       <!-- Tabs Navigation -->
       <div class="flex space-x-4 overflow-x-auto mt-8">
-        <button
-          v-for="(tab, idx) in tabs"
-          :key="tab.id"
-          @click="activeIndex = idx"
-          :class="[
-            'pb-2 whitespace-nowrap',
-            activeIndex === idx
-              ? 'text-[#d9b16b] border-b-2 border-[#d9b16b]'
-              : 'text-gray-600'
-          ]"
-        >
+        <button v-for="(tab, idx) in tabs" :key="tab.id" @click="activeIndex = idx" :class="[
+          'pb-2 whitespace-nowrap',
+          activeIndex === idx
+            ? 'text-[#d9b16b] border-b-2 border-[#d9b16b]'
+            : 'text-gray-600'
+        ]">
           {{ tab.label }}
         </button>
       </div>
@@ -38,41 +30,38 @@
       <!-- Active Tab Card -->
       <div class="mt-6 bg-white rounded-lg shadow-lg overflow-hidden">
         <router-link :to="`/tours/${current.id}`" class="block">
-          <img
-            :src="current.image"
-            :alt="current.label"
-            class="w-full h-64 object-cover"
-            loading="lazy"
-          />
+          <img :src="current.image" :alt="current.label" class="w-full h-64 object-cover" loading="lazy" />
         </router-link>
         <div class="p-6">
           <!-- Description -->
           <p class="text-gray-700 mb-4 text-justify">
             {{ descriptions[current.id] }}
           </p>
+          <!-- More Details Button -->
+          <div class="mb-4">
+            <router-link :to="`/tours/${current.id}`" class="inline-block text-[#d9b16b] font-semibold hover:underline">
+              More details →
+            </router-link>
+          </div>
+
           <!-- Accordion -->
           <details class="border border-gray-200 rounded-md">
             <summary class="cursor-pointer font-semibold px-4 py-2 bg-gray-100">Additional Info</summary>
             <ul class="grid grid-cols-2 gap-2 mt-2 px-4 pb-4">
-              <li
-                v-for="(feat, i) in current.features"
-                :key="i"
-                class="flex items-start"
-              >
+              <li v-for="(feat, i) in current.features" :key="i" class="flex items-start">
                 <span class="mr-2 text-[#d9b16b]">✔</span>
                 <span class="text-gray-700">{{ feat }}</span>
               </li>
             </ul>
           </details>
+
         </div>
       </div>
 
       <!-- Book This Tour Button -->
       <div class="mt-6 text-center">
-        <router-link
-          to="/booking"
-          class="inline-block bg-[#d9b16b] text-white px-8 py-3 rounded-lg font-semibold hover:bg-[#b4952e] transition-colors"
-        >
+        <router-link to="/booking"
+          class="inline-block bg-[#d9b16b] text-white px-8 py-3 rounded-lg font-semibold hover:bg-[#b4952e] transition-colors">
           Book This Tour
         </router-link>
       </div>
@@ -176,11 +165,13 @@ const current = computed(() => tabs[activeIndex.value]);
 .island-tours p {
   line-height: 1.75;
 }
+
 .island-tours .flex::-webkit-scrollbar {
   height: 4px;
 }
+
 .island-tours .flex::-webkit-scrollbar-thumb {
-  background-color: rgba(0,0,0,0.2);
+  background-color: rgba(0, 0, 0, 0.2);
   border-radius: 2px;
 }
 </style>

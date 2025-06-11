@@ -9,7 +9,7 @@
 
     <div class="tour-steps">
       <template v-for="(step, idx) in tour.steps" :key="idx">
-        <details class="tour-step">
+        <details class="tour-step" :open="idx === 0">
           <summary>{{ step.title }}</summary>
           <div class="step-content">
             <img :src="step.image" :alt="step.title" class="step-image" loading="lazy"/>
