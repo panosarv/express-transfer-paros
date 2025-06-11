@@ -223,7 +223,7 @@
         <!-- Step 3 -->
         <transition name="fade-up" mode="out-in">
           <div v-if="currentStep === 3" class="space-y-4">
-            <h3 class="text-lg font-semibold">Date, Time & Details</h3>
+            <h3 class="text-lg font-semibold">Date, Time & Number of Passengers</h3>
 
             <input
               name="date"
