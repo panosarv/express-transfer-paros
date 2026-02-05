@@ -5,12 +5,26 @@
  * that can be used for Google Ads conversion tracking.
  */
 
+// Debounce tracking to prevent duplicate events
+let lastCallButtonClick = 0;
+const DEBOUNCE_TIME = 1000; // 1 second
+
 /**
  * Track when a user clicks the "Call Us" button
  * This event can be used for Google Ads conversion tracking
  */
 export function trackCallButtonClick() {
+  const now = Date.now();
+
+  // Prevent duplicate events within 1 second
+  if (now - lastCallButtonClick < DEBOUNCE_TIME) {
+    console.log('⏭️ Skipping duplicate event (too soon)');
+    return;
+  }
+
+  lastCallButtonClick = now;
   console.log('trackCallButtonClick called');
+
   if (typeof window.gtag === 'function') {
     console.log('gtag is available, sending event');
     window.gtag('event', 'call_button_click', {
@@ -24,13 +38,27 @@ export function trackCallButtonClick() {
   }
 }
 
+// Track last phone click to prevent duplicates
+let lastPhoneClick = {};
+
 /**
  * Track when a user clicks on a phone number link
  * @param {string} source - Where the phone link was clicked (e.g., 'footer', 'contact_section')
  * @param {string} linkType - Type of link (e.g., 'tel', 'whatsapp', 'viber')
  */
 export function trackPhoneClick(source, linkType = 'tel') {
+  const now = Date.now();
+  const key = `${source}-${linkType}`;
+
+  // Prevent duplicate events within 1 second for the same source
+  if (lastPhoneClick[key] && now - lastPhoneClick[key] < DEBOUNCE_TIME) {
+    console.log(`⏭️ Skipping duplicate phone click event for ${key}`);
+    return;
+  }
+
+  lastPhoneClick[key] = now;
   console.log(`trackPhoneClick called: ${source} - ${linkType}`);
+
   if (typeof window.gtag === 'function') {
     window.gtag('event', 'phone_number_click', {
       event_category: 'conversion',
