@@ -22,7 +22,6 @@ export function trackCallButtonClick(callback) {
       event_category: 'engagement',
       event_label: 'Call Us Button',
       phone_number: '+30 698 091 1843',
-      debug_mode: true,
       event_callback: done
     });
     setTimeout(done, 300);
@@ -50,7 +49,6 @@ export function trackPhoneClick(source, linkType = 'tel', callback) {
       event_label: `Phone Click - ${source}`,
       phone_number: '+30 698 091 1843',
       link_type: linkType,
-      debug_mode: true,
       event_callback: done
     });
     setTimeout(done, 300);
