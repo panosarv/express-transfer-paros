@@ -9,13 +9,25 @@
  * Track when a user clicks the "Call Us" button
  * This event can be used for Google Ads conversion tracking
  */
-export function trackCallButtonClick() {
+export function trackCallButtonClick(callback) {
   if (typeof window.gtag === 'function') {
+    let called = false;
+    const done = () => {
+      if (!called) {
+        called = true;
+        callback?.();
+      }
+    };
     window.gtag('event', 'call_button_click', {
       event_category: 'engagement',
       event_label: 'Call Us Button',
-      phone_number: '+30 698 091 1843'
+      phone_number: '+30 698 091 1843',
+      debug_mode: true,
+      event_callback: done
     });
+    setTimeout(done, 300);
+  } else {
+    callback?.();
   }
 }
 
@@ -24,14 +36,26 @@ export function trackCallButtonClick() {
  * @param {string} source - Where the phone link was clicked (e.g., 'footer', 'contact_section')
  * @param {string} linkType - Type of link (e.g., 'tel', 'whatsapp', 'viber')
  */
-export function trackPhoneClick(source, linkType = 'tel') {
+export function trackPhoneClick(source, linkType = 'tel', callback) {
   if (typeof window.gtag === 'function') {
+    let called = false;
+    const done = () => {
+      if (!called) {
+        called = true;
+        callback?.();
+      }
+    };
     window.gtag('event', 'phone_number_click', {
       event_category: 'engagement',
       event_label: `Phone Click - ${source}`,
       phone_number: '+30 698 091 1843',
-      link_type: linkType
+      link_type: linkType,
+      debug_mode: true,
+      event_callback: done
     });
+    setTimeout(done, 300);
+  } else {
+    callback?.();
   }
 }
 

@@ -89,8 +89,10 @@ function nextVideo() {
 
 function callNow() {
   // Track the call button click for Google Analytics & Ads conversion
-  trackCallButtonClick();
-  window.location.href = `tel:+306980911843`;
+  // Navigation is deferred to the callback so the event is sent before the browser navigates away
+  trackCallButtonClick(() => {
+    window.location.href = 'tel:+306980911843';
+  });
 }
 </script>
 
