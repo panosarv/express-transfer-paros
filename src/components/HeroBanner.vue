@@ -65,6 +65,7 @@
 
 <script setup>
 import { ref, nextTick } from 'vue';
+import { trackCallButtonClick } from '../utils/analytics';
 
 import videoBanner1 from '../assets/etp-hero-banner-1.mp4';
 import videoBanner2 from '../assets/etp-hero-banner-2.mp4';
@@ -87,6 +88,8 @@ function nextVideo() {
 }
 
 function callNow() {
+  // Track the call button click for Google Analytics & Ads conversion
+  trackCallButtonClick();
   window.location.href = `tel:+306980911843`;
 }
 </script>

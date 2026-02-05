@@ -16,10 +16,13 @@
 
     <div class="max-w-7xl mx-auto space-y-6 text-center">
       <a href="https://wa.me/306980911843" target="_blank" rel="noopener noreferrer"
+        @click="handleWhatsAppClick"
         class="block text-white hover:underline">
         WhatsApp: +30 698 091 1843
       </a>
-      <a href="viber://chat?number=%2B306980911843" class="block text-white hover:underline">
+      <a href="viber://chat?number=%2B306980911843"
+        @click="handleViberClick"
+        class="block text-white hover:underline">
         Viber: +30 698 091 1843
       </a>
       <a href="mailto:info@expresstransferparos.com" class="block text-white hover:underline">
@@ -412,6 +415,7 @@
 
 <script setup>
 import { ref, reactive, computed } from 'vue';
+import { trackPhoneClick } from '../utils/analytics';
 import vitoImage from '../assets/etp_vito_modal.png';
 import peugeotImage from '../assets/etp_5008_modal.png';
 
@@ -685,6 +689,14 @@ function submitForm() {
     }
   });
   f.submit();
+}
+
+function handleWhatsAppClick() {
+  trackPhoneClick('contact_section', 'whatsapp');
+}
+
+function handleViberClick() {
+  trackPhoneClick('contact_section', 'viber');
 }
 </script>
 
