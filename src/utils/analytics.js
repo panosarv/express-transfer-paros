@@ -12,7 +12,7 @@
 export function trackCallButtonClick() {
   if (typeof window.gtag === 'function') {
     window.gtag('event', 'call_button_click', {
-      event_category: 'engagement',
+      event_category: 'conversion',
       event_label: 'Call Us Button',
       phone_number: '+30 698 091 1843'
     });
@@ -27,7 +27,7 @@ export function trackCallButtonClick() {
 export function trackPhoneClick(source, linkType = 'tel') {
   if (typeof window.gtag === 'function') {
     window.gtag('event', 'phone_number_click', {
-      event_category: 'engagement',
+      event_category: 'conversion',
       event_label: `Phone Click - ${source}`,
       phone_number: '+30 698 091 1843',
       link_type: linkType
