@@ -1,33 +1,38 @@
 <script setup>
-import Navbar from '../components/Navbar.vue'
-import HeroBanner from '../components/HeroBanner.vue'
-import ContactSection from '../components/ContactSection.vue'
-import ServicesSection from '../components/ServicesSection.vue'
-import MeetTheTeam from '../components/MeetTheTeam.vue'
+import Navbar from '../components/Navbar.vue';
+import HeroWindowSection from '../components/sections/HeroWindowSection.vue';
+import AboutSection from '../components/sections/AboutSection.vue';
+import StatsSection from '../components/sections/StatsSection.vue';
+import ServicesCarousel from '../components/sections/ServicesCarousel.vue';
+import FleetSection from '../components/sections/FleetSection.vue';
+import ReviewsSection from '../components/sections/ReviewsSection.vue';
+import PersistentCTA from '../components/ui/PersistentCTA.vue';
 </script>
 
 <template>
-  <div class="min-h-screen bg-[#232436]-50">
+  <div class="min-h-screen bg-etp-dark overflow-x-hidden">
+    <!-- Navigation -->
     <Navbar />
-    <HeroBanner />
-    <ContactSection />
-    <ServicesSection />
-    <div class="relative py-16 px-4 sm:px-6 lg:px-8" id="booking">
-      <div class="absolute inset-0">
-        <img 
-          src="../assets/etp-meetteam.jpg"
-          class="w-full h-full object-cover"
-          alt="Paros background"
-          loading="lazy"
-        />
-        <div class="absolute inset-0 bg-[#232436]/70 backdrop-blur-sm"></div>
-      </div>
-      <div class="relative max-w-4xl mx-auto">
-        <div class="text-center">
-          
-        </div>
-        <MeetTheTeam />
-      </div>
-    </div>
+
+    <!-- Hero Section with Car Window Effect -->
+    <HeroWindowSection />
+
+    <!-- About Section with Fade-in Animations -->
+    <AboutSection />
+
+    <!-- Stats Section with Counter Animations -->
+    <StatsSection />
+
+    <!-- Services Section with Steering Wheel Carousel -->
+    <ServicesCarousel />
+
+    <!-- Fleet Section -->
+    <FleetSection />
+
+    <!-- Reviews Section -->
+    <ReviewsSection />
+
+    <!-- Persistent CTA (Book Now, Call, WhatsApp) -->
+    <PersistentCTA />
   </div>
 </template>

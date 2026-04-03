@@ -6,6 +6,7 @@ import 'vue-tel-input/vue-tel-input.css';
 
 
 import './style.css';
+import './styles/animations.css';
 
 const app = createApp(App);
 app.use(router); 
