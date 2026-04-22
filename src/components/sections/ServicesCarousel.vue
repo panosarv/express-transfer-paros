@@ -5,6 +5,7 @@ import steeringWheel from '../../assets/SteeringWheel-ETP-2.png';
 
 const sectionRef = ref(null);
 const wheelRef = ref(null);
+const mobileWheelRef = ref(null);
 const servicesContainerRef = ref(null);
 const cardsWrapperRef = ref(null);
 const activeIndex = ref(0);
@@ -181,11 +182,70 @@ onMounted(() => {
       </h2>
     </div>
 
-    <!-- Split Layout Container -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 h-screen">
+    <!-- Mobile Layout (< lg) -->
+    <div class="flex lg:hidden flex-col h-screen">
+      <!-- Steering wheel row: top half -->
+      <div class="flex items-center justify-center" style="height: 50vh;">
+        <div
+          ref="mobileWheelRef"
+          class="w-[80vw] max-w-[400px] aspect-square"
+        >
+          <img
+            :src="steeringWheel"
+            alt="Steering Wheel"
+            class="w-full h-full object-contain"
+            style="filter: drop-shadow(0 25px 50px rgba(0,0,0,0.3));"
+          />
+        </div>
+      </div>
+
+      <!-- Active service content panel: bottom half -->
+      <div class="overflow-hidden px-6 pt-4" style="height: 50vh;">
+        <Transition name="service-fade" mode="out-in">
+          <div :key="activeIndex" class="w-full max-w-lg mx-auto">
+            <!-- Title -->
+            <h3 class="font-heading text-2xl text-etp-dark mb-3">
+              {{ services[activeIndex]?.title }}
+            </h3>
+
+            <!-- Description -->
+            <p class="text-etp-dark/70 text-base mb-4 leading-relaxed">
+              {{ services[activeIndex]?.description }}
+            </p>
+
+            <!-- Features -->
+            <ul class="space-y-2 mb-5">
+              <li
+                v-for="feature in services[activeIndex]?.features"
+                :key="feature"
+                class="flex items-center text-etp-dark/60"
+              >
+                <svg class="w-5 h-5 text-etp-gold-dark mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                </svg>
+                {{ feature }}
+              </li>
+            </ul>
+
+            <!-- CTA -->
+            <a
+              :href="`/services/${services[activeIndex]?.id === 'transfers' ? 'private-transfers' : services[activeIndex]?.id === 'tours' ? 'island-tours' : services[activeIndex]?.id === 'wedding' ? 'wedding' : 'disposal-services'}`"
+              class="inline-flex items-center text-etp-gold-dark hover:text-etp-dark transition-colors group"
+            >
+              <span class="mr-2">Learn More</span>
+              <svg class="w-4 h-4 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+              </svg>
+            </a>
+          </div>
+        </Transition>
+      </div>
+    </div>
+
+    <!-- Desktop Layout (lg+) -->
+    <div class="hidden lg:grid grid-cols-2 h-screen">
       <!-- Left: Steering Wheel - Half visible -->
-      <div class="hidden lg:flex items-center justify-start h-full overflow-hidden">
-        <!-- Steering wheel - positioned so only right half is visible -->
+      <div class="flex items-center justify-start h-full overflow-hidden">
         <div
           ref="wheelRef"
           class="wheel-container"
@@ -215,17 +275,6 @@ onMounted(() => {
           ref="cardsWrapperRef"
           class="px-4 md:px-8 lg:px-12"
         >
-          <!-- Mobile steering wheel -->
-          <div class="lg:hidden flex justify-center mb-12">
-            <div class="w-48 h-48">
-              <img
-                :src="steeringWheel"
-                alt="Steering Wheel"
-                class="w-full h-full object-contain opacity-70"
-              />
-            </div>
-          </div>
-
           <!-- Service Cards -->
           <div class="space-y-[60vh] pt-[40vh] pb-[40vh]">
             <div
@@ -305,5 +354,15 @@ onMounted(() => {
   height: 90vh;
   transform: translateX(-45%);
   will-change: transform;
+}
+
+/* Mobile content panel crossfade */
+.service-fade-enter-active,
+.service-fade-leave-active {
+  transition: opacity 0.2s ease;
+}
+.service-fade-enter-from,
+.service-fade-leave-to {
+  opacity: 0;
 }
 </style>
