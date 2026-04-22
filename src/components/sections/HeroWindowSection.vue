@@ -68,7 +68,7 @@ onMounted(() => {
       <img
         :src="sceneryBg"
         alt="Paros Scenery"
-        class="w-full h-full object-cover object-center"
+        class="w-full h-full object-cover object-[60%_center] lg:object-center"
       />
     </div>
 
@@ -90,7 +90,7 @@ onMounted(() => {
         <img
           :src="windowFrame"
           alt="Car Window Frame"
-          class="w-full h-full object-cover"
+          class="w-full h-full object-cover object-top lg:object-center"
         />
       </div>
     </div>
