@@ -42,17 +42,13 @@ const services = [
 onMounted(() => {
   setTimeout(() => {
     createContext(() => {
-      const serviceCards = gsap.utils.toArray('.service-card');
-      const numCards = serviceCards.length;
+      const isMobile = window.innerWidth < 1024;
+      const numCards = services.length; // 4
 
-      // Each card gets: move phase (0.3) + lock/hold phase (0.7) of its segment
       const scrollPerCard = window.innerHeight * 1.2;
       const totalScroll = scrollPerCard * numCards;
 
-      // Calculate center position for cards
-      const viewportCenter = window.innerHeight * 0.4; // 40% from top
-
-      // Main pinned timeline
+      // Main pinned timeline (same on mobile and desktop)
       const tl = gsap.timeline({
         scrollTrigger: {
           trigger: sectionRef.value,
@@ -64,85 +60,102 @@ onMounted(() => {
         }
       });
 
-      // Steering wheel rotation
-      tl.to(wheelRef.value, {
-        rotation: 360,
-        ease: 'none',
-        duration: 1
-      }, 0);
+      if (isMobile) {
+        // Mobile: rotate the mobile wheel only
+        tl.to(mobileWheelRef.value, {
+          rotation: 360,
+          ease: 'none',
+          duration: 1
+        }, 0);
+      } else {
+        // Desktop: rotate desktop wheel + animate card stack
+        tl.to(wheelRef.value, {
+          rotation: 360,
+          ease: 'none',
+          duration: 1
+        }, 0);
 
-      // Get card positions and calculate movements
-      const cardPositions = serviceCards.map((card, i) => {
-        const rect = card.getBoundingClientRect();
-        const wrapperRect = cardsWrapperRef.value.getBoundingClientRect();
-        return rect.top - wrapperRect.top;
-      });
+        const serviceCards = gsap.utils.toArray('.service-card');
+        const viewportCenter = window.innerHeight * 0.4;
 
-      // Animate each card to center with lock effect
-      serviceCards.forEach((card, i) => {
-        const content = card.querySelector('.service-content');
+        const cardPositions = serviceCards.map((card) => {
+          const rect = card.getBoundingClientRect();
+          const wrapperRect = cardsWrapperRef.value.getBoundingClientRect();
+          return rect.top - wrapperRect.top;
+        });
+
+        serviceCards.forEach((card, i) => {
+          const content = card.querySelector('.service-content');
+          const segmentStart = i / numCards;
+          const segmentEnd = (i + 1) / numCards;
+          const moveEnd = segmentStart + (segmentEnd - segmentStart) * 0.3;
+          const lockStart = moveEnd;
+
+          const targetY = -(cardPositions[i] - viewportCenter);
+
+          if (i === 0) {
+            gsap.set(cardsWrapperRef.value, { y: targetY });
+            gsap.set(content, { opacity: 1, filter: 'blur(0px)', scale: 1 });
+          } else {
+            gsap.set(content, { opacity: 0.3, filter: 'blur(4px)', scale: 0.95 });
+          }
+
+          if (i > 0) {
+            const prevContent = serviceCards[i - 1].querySelector('.service-content');
+            tl.to(prevContent, {
+              opacity: 0.3,
+              filter: 'blur(4px)',
+              scale: 0.95,
+              duration: (moveEnd - segmentStart) * 0.5,
+              ease: 'power2.in'
+            }, segmentStart);
+
+            tl.to(cardsWrapperRef.value, {
+              y: targetY,
+              ease: 'power2.out',
+              duration: moveEnd - segmentStart
+            }, segmentStart);
+
+            tl.to(content, {
+              opacity: 1,
+              filter: 'blur(0px)',
+              scale: 0.95,
+              duration: (moveEnd - segmentStart) * 0.8,
+              ease: 'power2.out'
+            }, segmentStart);
+          }
+
+          tl.to(content, {
+            scale: 1.02,
+            duration: 0.02,
+            ease: 'power2.out'
+          }, lockStart);
+
+          tl.to(content, {
+            scale: 1,
+            duration: 0.03,
+            ease: 'elastic.out(1, 0.5)'
+          }, lockStart + 0.02);
+        });
+
+        // Heading animation (desktop only)
+        gsap.from('.services-heading', {
+          scrollTrigger: {
+            trigger: sectionRef.value,
+            start: 'top 80%',
+            toggleActions: 'play none none reverse'
+          },
+          y: 40,
+          opacity: 0,
+          duration: 0.8
+        });
+      }
+
+      // activeIndex updates — always run on both mobile and desktop
+      services.forEach((_, i) => {
         const segmentStart = i / numCards;
         const segmentEnd = (i + 1) / numCards;
-        const moveEnd = segmentStart + (segmentEnd - segmentStart) * 0.3; // First 30% is movement
-        const lockStart = moveEnd;
 
-        // Calculate how much to move wrapper to center this card
-        const targetY = -(cardPositions[i] - viewportCenter);
-
-        // Set initial state
-        if (i === 0) {
-          // First card starts centered and focused
-          gsap.set(cardsWrapperRef.value, { y: targetY });
-          gsap.set(content, { opacity: 1, filter: 'blur(0px)', scale: 1 });
-          activeIndex.value = 0;
-        } else {
-          // Other cards start blurred
-          gsap.set(content, { opacity: 0.3, filter: 'blur(4px)', scale: 0.95 });
-        }
-
-        // For cards after the first, animate wrapper to bring them to center
-        if (i > 0) {
-          // Previous card blurs as this one starts moving
-          const prevContent = serviceCards[i - 1].querySelector('.service-content');
-          tl.to(prevContent, {
-            opacity: 0.3,
-            filter: 'blur(4px)',
-            scale: 0.95,
-            duration: (moveEnd - segmentStart) * 0.5,
-            ease: 'power2.in'
-          }, segmentStart);
-
-          // Move wrapper to center this card
-          tl.to(cardsWrapperRef.value, {
-            y: targetY,
-            ease: 'power2.out',
-            duration: moveEnd - segmentStart
-          }, segmentStart);
-
-          // This card comes into focus as it moves
-          tl.to(content, {
-            opacity: 1,
-            filter: 'blur(0px)',
-            scale: 0.95,
-            duration: (moveEnd - segmentStart) * 0.8,
-            ease: 'power2.out'
-          }, segmentStart);
-        }
-
-        // Lock animation - subtle scale bounce when card reaches center
-        tl.to(content, {
-          scale: 1.02,
-          duration: 0.02,
-          ease: 'power2.out'
-        }, lockStart);
-
-        tl.to(content, {
-          scale: 1,
-          duration: 0.03,
-          ease: 'elastic.out(1, 0.5)'
-        }, lockStart + 0.02);
-
-        // Update active index
         ScrollTrigger.create({
           trigger: sectionRef.value,
           start: `top+=${segmentStart * totalScroll} top`,
@@ -150,18 +163,6 @@ onMounted(() => {
           onEnter: () => { activeIndex.value = i; },
           onEnterBack: () => { activeIndex.value = i; }
         });
-      });
-
-      // Initial heading animation
-      gsap.from('.services-heading', {
-        scrollTrigger: {
-          trigger: sectionRef.value,
-          start: 'top 80%',
-          toggleActions: 'play none none reverse'
-        },
-        y: 40,
-        opacity: 0,
-        duration: 0.8
       });
 
     }, sectionRef.value);
@@ -183,9 +184,9 @@ onMounted(() => {
     </div>
 
     <!-- Mobile Layout (< lg) -->
-    <div class="flex lg:hidden flex-col h-screen">
+    <div class="flex lg:hidden flex-col" style="height: calc(100dvh - 10rem);">
       <!-- Steering wheel row: top half -->
-      <div class="flex items-center justify-center" style="height: 50vh;">
+      <div class="flex items-center justify-center" style="height: 50%;">
         <div
           ref="mobileWheelRef"
           class="w-[80vw] max-w-[400px] aspect-square"
@@ -200,7 +201,7 @@ onMounted(() => {
       </div>
 
       <!-- Active service content panel: bottom half -->
-      <div class="overflow-hidden px-6 pt-4" style="height: 50vh;">
+      <div class="overflow-hidden px-6 pt-4" style="height: 50%;">
         <Transition name="service-fade" mode="out-in">
           <div :key="activeIndex" class="w-full max-w-lg mx-auto">
             <!-- Title -->
