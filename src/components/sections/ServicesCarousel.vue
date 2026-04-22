@@ -61,6 +61,7 @@ onMounted(() => {
       });
 
       if (isMobile) {
+        activeIndex.value = 0; // reset on context re-creation
         // Mobile: rotate the mobile wheel only
         tl.to(mobileWheelRef.value, {
           rotation: 360,
