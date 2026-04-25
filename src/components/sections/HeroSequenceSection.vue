@@ -16,24 +16,26 @@ let ctx = null;
 let currentFrameIndex = 0;
 let resizeTimer = null;
 
-// Zero-pad a number to 3 digits: 1 → "001", 42 → "042"
-function padIndex(n) {
-  return String(n).padStart(3, '0');
-}
+// Resolve all frame URLs via Vite's asset pipeline (src/assets → hashed output URLs).
+// Sorted alphabetically so frame order matches filename order (001, 002, ..., 080).
+const frameModules = import.meta.glob('../../assets/hero_frames/*.png', { eager: true });
+const allFramePaths = Object.keys(frameModules)
+  .sort()
+  .map(key => frameModules[key].default);
 
-// Load all frames as HTMLImageElement objects.
+// Load frames as HTMLImageElement objects.
 // isMobile=true loads every other frame (40 frames) to halve bandwidth.
 function preloadFrames(isMobile) {
-  const indices = isMobile
-    ? Array.from({ length: 40 }, (_, i) => i * 2 + 1)  // 1,3,5,...,79
-    : Array.from({ length: 80 }, (_, i) => i + 1);       // 1,2,3,...,80
+  const paths = isMobile
+    ? allFramePaths.filter((_, i) => i % 2 === 0)  // even indices → 40 frames
+    : allFramePaths;                                  // all frames
 
   return Promise.all(
-    indices.map(n => new Promise((resolve, reject) => {
+    paths.map(src => new Promise((resolve, reject) => {
       const img = new Image();
       img.onload = () => resolve(img);
-      img.onerror = () => reject(new Error(`Failed to load frame ${n}`));
-      img.src = `/assets/hero_frames/ezgif-frame-${padIndex(n)}.png`;
+      img.onerror = () => reject(new Error(`Failed to load frame: ${src}`));
+      img.src = src;
     }))
   );
 }
