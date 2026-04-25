@@ -8,7 +8,7 @@ const canvasRef = ref(null);
 const brandRef = ref(null);
 const scrollIndicatorRef = ref(null);
 
-const { gsap, createContext, ScrollTrigger } = useGsap();
+const { gsap, createContext } = useGsap();
 
 // Non-reactive state — never use ref() for these (performance critical)
 let frames = [];
