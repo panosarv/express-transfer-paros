@@ -48,6 +48,7 @@ function sizeCanvas() {
 // Draw a single frame onto the canvas using object-fit:cover math.
 // The image is scaled to fill the canvas, centred, with overflow cropped.
 function drawFrame(img) {
+  if (!ctx) return;
   const cw = canvasRef.value.width;
   const ch = canvasRef.value.height;
   const scale = Math.max(cw / img.naturalWidth, ch / img.naturalHeight);
@@ -67,11 +68,82 @@ onMounted(async () => {
   // Size canvas to fill the section
   sizeCanvas();
 
-  // Preload all frames before starting animation
-  frames = await preloadFrames(isMobile);
+  // Preload all frames — log error and abort GSAP setup if loading fails
+  try {
+    frames = await preloadFrames(isMobile);
+  } catch (error) {
+    console.error('Failed to preload hero frames:', error);
+    return;
+  }
 
   // Draw frame 0 immediately so there's no blank canvas
   drawFrame(frames[0]);
+
+  const totalFrames = frames.length;           // 80 desktop / 40 mobile
+  const scrollDistance = totalFrames * 30;     // 2400px / 1200px
+
+  createContext(() => {
+    // Brand name entrance — runs once on mount, not scroll-driven
+    gsap.from(brandRef.value, {
+      opacity: 0,
+      y: 20,
+      duration: 1,
+      delay: 0.3,
+      ease: 'power2.out'
+    });
+
+    // Main ScrollTrigger timeline — drives all scroll-based effects
+    const tl = gsap.timeline({
+      scrollTrigger: {
+        trigger: heroRef.value,
+        start: 'top top',
+        end: `+=${scrollDistance}`,
+        pin: true,
+        scrub: true,
+        anticipatePin: 1,
+        onUpdate(self) {
+          const index = Math.min(
+            Math.floor(self.progress * totalFrames),
+            totalFrames - 1
+          );
+          if (index !== currentFrameIndex) {
+            currentFrameIndex = index;
+            drawFrame(frames[index]);
+          }
+        }
+      }
+    });
+
+    // Zoom: canvas wrapper scales 1 → 1.05 (1.03 on mobile) over full scroll
+    tl.to(zoomWrapperRef.value, {
+      scale: isMobile ? 1.03 : 1.05,
+      ease: 'none',
+      duration: 1
+    }, 0);
+
+    // Scroll indicator: fades out over first 10% of scroll progress
+    tl.to(scrollIndicatorRef.value, {
+      opacity: 0,
+      ease: 'none',
+      duration: 0.10
+    }, 0);
+
+    // Brand name: fades out over first 25% of scroll progress
+    tl.to(brandRef.value, {
+      opacity: 0,
+      ease: 'none',
+      duration: 0.25
+    }, 0);
+
+    // Exit: hero fades and scales down over last 15% (progress 0.85 → 1.0)
+    tl.to(heroRef.value, {
+      opacity: 0,
+      scale: 0.97,
+      ease: 'power1.in',
+      duration: 0.15
+    }, 0.85);
+
+  }, heroRef.value);
 });
 </script>
 
