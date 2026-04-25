@@ -67,6 +67,7 @@ onMounted(async () => {
 
   // Size canvas to fill the section
   sizeCanvas();
+  window.addEventListener('resize', onResize);
 
   // Preload all frames — log error and abort GSAP setup if loading fails
   try {
@@ -144,6 +145,24 @@ onMounted(async () => {
     }, 0.85);
 
   }, heroRef.value);
+});
+
+// Debounced resize: re-sizes canvas and redraws the current frame.
+// Debounce prevents excessive redraws during a continuous resize drag.
+function onResize() {
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(() => {
+    sizeCanvas();
+    if (frames[currentFrameIndex]) {
+      drawFrame(frames[currentFrameIndex]);
+    }
+  }, 100);
+}
+
+onUnmounted(() => {
+  window.removeEventListener('resize', onResize);
+  clearTimeout(resizeTimer);
+  // useGsap composable handles ScrollTrigger.kill() and context.revert() automatically
 });
 </script>
 
