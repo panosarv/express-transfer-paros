@@ -9,9 +9,9 @@ export function useGsap() {
   const contexts = [];
 
   onUnmounted(() => {
-    // Clean up all GSAP contexts on component unmount
+    // ctx.revert() cleans up all GSAP animations and ScrollTriggers
+    // created within each context — no need to kill globally.
     contexts.forEach(ctx => ctx.revert());
-    ScrollTrigger.getAll().forEach(st => st.kill());
   });
 
   const createScrollTrigger = (trigger, options) => {
