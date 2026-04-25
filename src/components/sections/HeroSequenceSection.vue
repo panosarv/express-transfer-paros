@@ -15,6 +15,64 @@ let frames = [];
 let ctx = null;
 let currentFrameIndex = 0;
 let resizeTimer = null;
+
+// Zero-pad a number to 3 digits: 1 → "001", 42 → "042"
+function padIndex(n) {
+  return String(n).padStart(3, '0');
+}
+
+// Load all frames as HTMLImageElement objects.
+// isMobile=true loads every other frame (40 frames) to halve bandwidth.
+function preloadFrames(isMobile) {
+  const indices = isMobile
+    ? Array.from({ length: 40 }, (_, i) => i * 2 + 1)  // 1,3,5,...,79
+    : Array.from({ length: 80 }, (_, i) => i + 1);       // 1,2,3,...,80
+
+  return Promise.all(
+    indices.map(n => new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => resolve(img);
+      img.onerror = () => reject(new Error(`Failed to load frame ${n}`));
+      img.src = `/assets/hero_frames/ezgif-frame-${padIndex(n)}.png`;
+    }))
+  );
+}
+
+// Set canvas pixel dimensions to match the section element.
+// Must be called before any drawFrame call and again on resize.
+function sizeCanvas() {
+  canvasRef.value.width  = heroRef.value.offsetWidth;
+  canvasRef.value.height = heroRef.value.offsetHeight;
+}
+
+// Draw a single frame onto the canvas using object-fit:cover math.
+// The image is scaled to fill the canvas, centred, with overflow cropped.
+function drawFrame(img) {
+  const cw = canvasRef.value.width;
+  const ch = canvasRef.value.height;
+  const scale = Math.max(cw / img.naturalWidth, ch / img.naturalHeight);
+  const sw = cw / scale;
+  const sh = ch / scale;
+  const sx = (img.naturalWidth  - sw) / 2;
+  const sy = (img.naturalHeight - sh) / 2;
+  ctx.drawImage(img, sx, sy, sw, sh, 0, 0, cw, ch);
+}
+
+onMounted(async () => {
+  const isMobile = window.innerWidth < 768;
+
+  // Initialise canvas 2D context
+  ctx = canvasRef.value.getContext('2d');
+
+  // Size canvas to fill the section
+  sizeCanvas();
+
+  // Preload all frames before starting animation
+  frames = await preloadFrames(isMobile);
+
+  // Draw frame 0 immediately so there's no blank canvas
+  drawFrame(frames[0]);
+});
 </script>
 
 <template>
