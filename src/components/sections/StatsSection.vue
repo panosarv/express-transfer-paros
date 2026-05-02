@@ -17,51 +17,49 @@ const stats = [
 ];
 
 onMounted(() => {
-  setTimeout(() => {
-    createContext(() => {
-      // Pin the section while car travels across
-      const tl = gsap.timeline({
-        scrollTrigger: {
-          trigger: sectionRef.value,
-          start: 'top top',
-          end: '+=200%',
-          scrub: 1,
-          pin: true,
-          anticipatePin: 1
-        }
-      });
+  createContext(() => {
+    // Pin the section while car travels across
+    const tl = gsap.timeline({
+      scrollTrigger: {
+        trigger: sectionRef.value,
+        start: 'top top',
+        end: '+=200%',
+        scrub: 1,
+        pin: true,
+        anticipatePin: 1
+      }
+    });
 
-      // Set initial position off-screen right
-      gsap.set(carRef.value, { left: '100%', x: '100%' });
+    // Set initial position off-screen right
+    gsap.set(carRef.value, { left: '100%', x: '100%' });
 
-      // Heading and stats fade in immediately at the start
-      tl.from('.stats-heading', {
-        opacity: 0,
-        y: 30,
-        ease: 'power2.out',
-        duration: 0.1
-      }, 0);
+    // Heading and stats fade in immediately at the start
+    tl.from('.stats-heading', {
+      opacity: 0,
+      y: 30,
+      ease: 'power2.out',
+      duration: 0.1
+    }, 0);
 
-      tl.from(statsRef.value, {
-        opacity: 0,
-        y: 40,
-        ease: 'power2.out',
-        duration: 0.1
-      }, 0.02);
+    tl.from(statsRef.value, {
+      opacity: 0,
+      y: 40,
+      ease: 'power2.out',
+      duration: 0.1
+    }, 0.02);
 
-      // Car enters from right, crosses screen (0.05 to 0.6)
-      // Car passes in front of the numbers
-      tl.to(carRef.value, {
-        left: '0%',
-        x: '-100%',
-        ease: 'none',
-        duration: 0.55
-      }, 0.05);
+    // Car enters from right, crosses screen (0.05 to 0.6)
+    // Car passes in front of the numbers
+    tl.to(carRef.value, {
+      left: '0%',
+      x: '-100%',
+      ease: 'none',
+      duration: 0.55
+    }, 0.05);
 
-      // Hold at the end for counters to finish (0.6 to 1.0)
+    // Hold at the end for counters to finish (0.6 to 1.0)
 
-    }, sectionRef.value);
-  }, 100);
+  }, sectionRef.value);
 });
 </script>
 

@@ -40,7 +40,6 @@ const services = [
 ];
 
 onMounted(() => {
-  setTimeout(() => {
     createContext(() => {
       const isMobile = window.innerWidth < 1024;
       const numCards = services.length; // 4
@@ -56,7 +55,9 @@ onMounted(() => {
           end: `+=${totalScroll}`,
           scrub: 0.3,
           pin: true,
-          anticipatePin: 1
+          anticipatePin: 1,
+          pinType: 'transform',
+          markers: import.meta.env.DEV
         }
       });
 
@@ -167,14 +168,13 @@ onMounted(() => {
       });
 
     }, sectionRef.value);
-  }, 100);
 });
 </script>
 
 <template>
   <section
     ref="sectionRef"
-    class="relative bg-etp-cream"
+    class="relative z-[1] bg-etp-cream"
   >
     <!-- Section Header -->
     <div class="services-heading text-center pt-24 pb-12 px-4">
