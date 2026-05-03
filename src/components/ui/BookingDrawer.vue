@@ -101,7 +101,6 @@ const form = reactive({
 });
 
 const step = ref(1);
-const submitted = ref(false);
 const submitting = ref(false);
 const submitError = ref('');
 
@@ -137,7 +136,7 @@ const dropoffManualTxt = ref('');
 /* ─────────────────────────────
    Leaflet map state
 ───────────────────────────── */
-const showMapFor = ref(null); // pickup | dropoff
+const showMapFor = ref(null);
 const mapContainerRef = ref(null);
 const tempLat = ref(37.084);
 const tempLng = ref(25.148);
@@ -379,7 +378,6 @@ function close() {
 
 function resetForm() {
   step.value = 1;
-  submitted.value = false;
   submitting.value = false;
   submitError.value = '';
 
@@ -426,21 +424,18 @@ function prevStep() {
   if (step.value > 1) step.value--;
 }
 
-async function nextOrSubmit() {
+function nextStep() {
   submitError.value = '';
 
   if (!canNext.value) return;
 
   if (step.value < totalSteps.value) {
     step.value++;
-    return;
   }
-
-  await submitForm();
 }
 
 /* ─────────────────────────────
-   Formspree payload
+   Native Formspree payload
 ───────────────────────────── */
 function getBookingReference() {
   return `ETP-${Date.now().toString(36).toUpperCase()}`;
@@ -494,14 +489,14 @@ function getBookingSummary() {
   return `${selectedTour.value?.label || form.tourType || 'Tour'} on ${form.date || 'date not provided'} at ${form.time || 'time not provided'}`;
 }
 
-function buildFormspreePayload() {
+function buildNativePayload() {
   const bookingReference = getBookingReference();
   const submittedAt = new Date().toISOString();
 
   const pickupLocation = getPickupLocationForPayload();
   const dropoffLocation = getDropoffLocationForPayload();
 
-  const payload = {
+  return {
     /*
       Required by your Formspree endpoint.
       These names must stay exactly as they are.
@@ -632,71 +627,35 @@ function buildFormspreePayload() {
       ? customPlaces.value.length
       : '',
   };
-
-  Object.keys(payload).forEach(key => {
-    if (payload[key] === undefined) delete payload[key];
-  });
-
-  return payload;
 }
 
-async function submitForm() {
-  submitting.value = true;
+const nativePayload = computed(() => buildNativePayload());
+
+function handleNativeSubmit(event) {
   submitError.value = '';
 
-  const payload = buildFormspreePayload();
-
-  try {
-    if (typeof trackBookingSubmission === 'function') {
-      trackBookingSubmission({
-        ...form,
-        selectedTourLabel: selectedTour.value?.label || '',
-        indicativePrice: indicativePrice.value,
-        customTourDuration: getCustomTourDuration(),
-        customPlaces: [...customPlaces.value],
-      });
-    }
-
-    const response = await fetch(FORMSPREE_ENDPOINT, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Accept: 'application/json',
-      },
-      body: JSON.stringify(payload),
-    });
-
-    if (!response.ok) {
-      let message = 'Something went wrong while sending your booking. Please try again.';
-
-      try {
-        const data = await response.json();
-
-        if (data?.errors?.length) {
-          message = data.errors
-            .map(error => {
-              const field = error.field ? `${error.field}: ` : '';
-              return `${field}${error.message}`;
-            })
-            .join(' ');
-        } else if (data?.message) {
-          message = data.message;
-        }
-      } catch {
-        // Keep fallback message.
-      }
-
-      throw new Error(message);
-    }
-
-    submitted.value = true;
-  } catch (error) {
-    console.error(error);
-    submitError.value =
-      error?.message || 'Something went wrong while sending your booking. Please try again.';
-  } finally {
-    submitting.value = false;
+  if (!canNext.value) {
+    event.preventDefault();
+    submitError.value = 'Please complete all required fields before submitting.';
+    return;
   }
+
+  submitting.value = true;
+
+  if (typeof trackBookingSubmission === 'function') {
+    trackBookingSubmission({
+      ...form,
+      selectedTourLabel: selectedTour.value?.label || '',
+      indicativePrice: indicativePrice.value,
+      customTourDuration: getCustomTourDuration(),
+      customPlaces: [...customPlaces.value],
+    });
+  }
+
+  /*
+    Do not prevent default here.
+    Native form submission must continue to Formspree.
+  */
 }
 
 /* ─────────────────────────────
@@ -848,27 +807,21 @@ onUnmounted(() => {
         @click.self="close"
       >
         <Transition name="modal-scale" mode="out-in">
-          <!-- Success -->
-          <div v-if="submitted" class="success-card">
-            <div class="success-icon">✓</div>
+          <form
+            class="booking-modal"
+            method="POST"
+            :action="FORMSPREE_ENDPOINT"
+            @submit="handleNativeSubmit"
+          >
+            <!-- Hidden native Formspree fields -->
+            <template v-for="(value, key) in nativePayload" :key="key">
+              <input
+                type="hidden"
+                :name="key"
+                :value="value"
+              />
+            </template>
 
-            <div class="eyebrow">Booking Received</div>
-
-            <h2 class="success-title">
-              Thank you{{ form.name ? `, ${form.name}` : '' }}!
-            </h2>
-
-            <p class="success-text">
-              We'll confirm your booking via WhatsApp or phone within the hour. See you on Paros.
-            </p>
-
-            <button type="button" class="gold-button" @click="close">
-              Back to Home
-            </button>
-          </div>
-
-          <!-- Main modal -->
-          <div v-else class="booking-modal">
             <!-- Header -->
             <div class="modal-header">
               <div class="brand-row">
@@ -960,7 +913,7 @@ onUnmounted(() => {
                       :class="{ selected: form.type === 'tour' }"
                       @click="form.type = 'tour'"
                     >
-                      <span class="type-icon">🏝️</span>
+                      <span class="type-icon">🏝</span>
                       <span class="type-title">Island Tour</span>
                       <span class="type-desc">Half-day or full-day guided experiences</span>
                     </button>
@@ -1487,16 +1440,25 @@ onUnmounted(() => {
               <div class="footer-spacer" />
 
               <button
+                v-if="step < totalSteps"
                 type="button"
                 class="continue-button"
-                :class="{ final: step === totalSteps }"
-                :disabled="!canNext || submitting"
-                @click="nextOrSubmit"
+                :disabled="!canNext"
+                @click="nextStep"
               >
-                {{ submitting ? 'Sending…' : step === totalSteps ? 'Confirm Booking ✓' : 'Continue →' }}
+                Continue →
+              </button>
+
+              <button
+                v-else
+                type="submit"
+                class="continue-button final"
+                :disabled="!canNext || submitting"
+              >
+                {{ submitting ? 'Sending…' : 'Confirm Booking ✓' }}
               </button>
             </div>
-          </div>
+          </form>
         </Transition>
       </div>
     </Transition>
@@ -1551,8 +1513,7 @@ onUnmounted(() => {
   padding: 20px;
 }
 
-.booking-modal,
-.success-card {
+.booking-modal {
   width: 100%;
   max-width: 560px;
   background: #0d2137;
@@ -1561,52 +1522,10 @@ onUnmounted(() => {
   box-shadow:
     0 40px 100px rgba(0, 0, 0, 0.6),
     inset 0 1px 0 rgba(255, 255, 255, 0.05);
-}
-
-.booking-modal {
   max-height: 90vh;
   display: flex;
   flex-direction: column;
   overflow: hidden;
-}
-
-.success-card {
-  padding: 60px 40px;
-  text-align: center;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.success-icon {
-  width: 72px;
-  height: 72px;
-  border-radius: 50%;
-  background: rgba(232, 201, 126, 0.1);
-  border: 1px solid var(--gold, #e8c97e);
-  color: var(--gold, #e8c97e);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 24px;
-  font-size: 32px;
-}
-
-.success-title {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 36px;
-  font-weight: 600;
-  color: #fff;
-  margin: 0 0 14px;
-}
-
-.success-text {
-  font-family: 'DM Sans', sans-serif;
-  font-size: 15px;
-  color: rgba(255, 255, 255, 0.6);
-  line-height: 1.7;
-  max-width: 340px;
-  margin: 0 auto 32px;
 }
 
 .modal-header {
@@ -2220,8 +2139,7 @@ onUnmounted(() => {
   cursor: pointer;
 }
 
-.continue-button,
-.gold-button {
+.continue-button {
   padding: 12px 28px;
   border-radius: 10px;
   font-family: 'DM Sans', sans-serif;
@@ -2230,17 +2148,13 @@ onUnmounted(() => {
   cursor: pointer;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-}
-
-.continue-button {
   background: linear-gradient(135deg, var(--sea, #1e5f8c), #0a4a6e);
   border: 1px solid rgba(126, 200, 227, 0.2);
   color: #fff;
   box-shadow: 0 4px 20px rgba(30, 95, 140, 0.4);
 }
 
-.continue-button.final,
-.gold-button {
+.continue-button.final {
   background: linear-gradient(135deg, #e8c97e, #c8a240);
   border: none;
   color: #0d2137;
