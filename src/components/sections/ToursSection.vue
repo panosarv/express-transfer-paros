@@ -5,8 +5,6 @@ import tourBeach    from '../../assets/etp-drios.jpg';
 import tourHalfDay  from '../../assets/etp-alyki.jpg';
 import tourFullDay  from '../../assets/etp-fullday-tour.jpeg';
 
-const emit = defineEmits(['book']);
-
 const TOURS = [
   {
     id: 'history-tour',
