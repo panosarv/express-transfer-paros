@@ -2,8 +2,17 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ── Aegean palette tokens ── */
 :root {
-  font-family: Old Standard TT, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  --navy:  #0d2137;
+  --sea:   #1e5f8c;
+  --sky:   #7ec8e3;
+  --gold:  #e8c97e;
+  --sand:  #f5ede0;
+  --white: #ffffff;
+  --muted: rgba(13,33,55,0.55);
+
+  font-family: "DM Sans", "Old Standard TT", system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
 }
@@ -11,7 +20,101 @@
 body {
   margin: 0;
   min-width: 320px;
-  background-color: #f3f4f6;
+  background-color: var(--sand);
   min-height: 100vh;
   overflow-x: clip;
+  -webkit-font-smoothing: antialiased;
+  color: var(--navy);
+}
+
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: var(--navy); }
+::-webkit-scrollbar-thumb { background: var(--gold); border-radius: 3px; }
+
+/* ── Scroll reveal ── */
+.reveal {
+  opacity: 0;
+  transform: translateY(32px);
+  transition: all 0.75s cubic-bezier(0.16,1,0.3,1);
+}
+.reveal.visible {
+  opacity: 1;
+  transform: none;
+}
+
+/* ── Animations ── */
+@keyframes marqueeLeft {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+@keyframes carWiggle {
+  0%,100% { transform: translateX(0) rotate(0deg); }
+  20%     { transform: translateX(2px) rotate(1.5deg); }
+  40%     { transform: translateX(-1px) rotate(-1deg); }
+  60%     { transform: translateX(2px) rotate(1deg); }
+  80%     { transform: translateX(-1px) rotate(-0.5deg); }
+}
+
+@keyframes wheelSpin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+@keyframes ctaPulse {
+  0%,100% { box-shadow: 0 0 0 0 rgba(232,201,126,0.5); }
+  50%     { box-shadow: 0 0 0 8px rgba(232,201,126,0); }
+}
+
+@keyframes scrollPulse {
+  0%   { opacity: 1; transform: scaleY(1) translateY(0); }
+  100% { opacity: 0; transform: scaleY(0.5) translateY(10px); }
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(28px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Mobile marquee strips ── */
+.marquee-strip {
+  display: none;
+  overflow: hidden;
+  background: var(--navy);
+  border-top: 1px solid rgba(232,201,126,0.2);
+  border-bottom: 1px solid rgba(232,201,126,0.2);
+  padding: 10px 0;
+  position: relative;
+  z-index: 5;
+}
+.marquee-track {
+  display: flex;
+  width: max-content;
+  animation: marqueeLeft 22s linear infinite;
+}
+.marquee-track.slow { animation-duration: 30s; }
+.marquee-track.reverse { animation-direction: reverse; }
+.marquee-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 28px;
+  font-family: "DM Sans", sans-serif;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(245,237,224,0.75);
+  white-space: nowrap;
+}
+.marquee-dot {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--gold);
+  flex-shrink: 0;
+}
+
+@media (max-width: 767px) {
+  .marquee-strip { display: block; }
 }

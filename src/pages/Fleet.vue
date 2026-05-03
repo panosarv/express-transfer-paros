@@ -42,7 +42,7 @@
 
 <script>
 import { Transition } from 'vue';
-import peugeotImage from '../assets/p5008-etp.jpeg';
+import skodaImg from '../assets/skodaSkala.png';
 import c3Image from '../assets/features-car-2.png';
 import vclassImage from '../assets/features-car-3.png';
 import vitoImage from '../assets/vito-etp.jpeg';
@@ -54,9 +54,9 @@ export default {
     return {
       vehicles: [
         {
-          name: 'Peugeot 5008',
-          image: peugeotImage,
-          description: 'Compact SUV seating up to 7 passengers, featuring spacious trunk, comfortable ride, and modern safety features.'
+          name: 'Skoda Scala',
+          image: skodaImg,
+          description: 'Compact SUV seating up to 4 passengers, featuring spacious trunk, comfortable ride, and modern safety features.'
         },
         {
           name: 'Mercedes Vito',

@@ -1,27 +1,19 @@
 <script setup>
-import { useRoute } from 'vue-router';
-import { defineAsyncComponent, computed } from 'vue';
+import { onMounted } from 'vue';
+import { useRouter } from 'vue-router';
 
-const route = useRoute();
-const service = computed(() => route.params.service);
+const router = useRouter();
 
-const componentsMap = {
-  'private-transfers': defineAsyncComponent(() => import('../components/services/PrivateTransfers.vue')),
-  'island-tours': defineAsyncComponent(() => import('../components/services/IslandTours.vue')),
-  'disposal-services': defineAsyncComponent(() => import('../components/services/DisposalServices.vue')),
-  'wedding': defineAsyncComponent(() => import('../components/services/Wedding.vue')),  
-};
-
-const ServiceComponent = computed(() => componentsMap[service.value] || null);
+// Service detail pages are now handled by the home page Services section
+onMounted(() => {
+  router.replace('/#services');
+});
 </script>
 
 <template>
-  <div class="min-h-screen bg-gray-50 py-8">
-    <component v-if="ServiceComponent" :is="ServiceComponent" />
-    <div v-else class="text-center text-red-600 py-10">Service not found.</div>
+  <div style="min-height:100vh;background:var(--navy);display:flex;align-items:center;justify-content:center;">
+    <div style="text-align:center;color:#fff;font-family:'DM Sans',sans-serif;">
+      Redirecting…
+    </div>
   </div>
 </template>
-
-<style scoped>
-/* Global styles for service detail pages */
-</style>

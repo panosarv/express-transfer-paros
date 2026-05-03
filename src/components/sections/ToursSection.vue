@@ -4,7 +4,7 @@ import tourHistory  from '../../assets/etp-history-tour.jpg';
 import tourBeach    from '../../assets/etp-drios.jpg';
 import tourHalfDay  from '../../assets/etp-alyki.jpg';
 import tourFullDay  from '../../assets/etp-fullday-tour.jpeg';
-
+import customTour   from '../../assets/etp-kolympithres.jpg'
 const TOURS = [
   {
     id: 'history-tour',
@@ -57,7 +57,7 @@ const TOURS = [
     duration: 'Flexible',
     price: 'Price on request',
     highlights: ['Fully customisable route', 'Local recommendations', 'Flexible schedule', 'Professional driver'],
-    photo: null,
+    photo: customTour,
     accent: '#7b5ea7',
     tag: 'Bespoke',
   },

@@ -1,164 +1,130 @@
 <script setup>
 import { ref, onMounted } from 'vue';
-import { useGsap } from '../../composables/useGsap';
-import sceneryBg from '../../assets/Layer2-ETP.jpg';
+import layer2          from '../../assets/Layer2-ETP.jpg';
+import steeringWheel   from '../../assets/SteeringWheel-ETP-2.png';
+import privatePhoto    from '../../assets/etp-private.jpg';
+import vitoPhoto       from '../../assets/etp-hero-vito.jpg';
 
-const sectionRef = ref(null);
-const headingRef = ref(null);
-const paragraphsRef = ref(null);
-const featuresRef = ref(null);
-const bgRef = ref(null);
+function useInView(threshold = 0.15) {
+  const el  = ref(null);
+  const vis = ref(false);
+  onMounted(() => {
+    const obs = new IntersectionObserver(([e]) => {
+      if (e.isIntersecting) { vis.value = true; obs.disconnect(); }
+    }, { threshold });
+    if (el.value) obs.observe(el.value);
+  });
+  return { el, vis };
+}
 
-const { gsap, createContext } = useGsap();
-
-const features = [
-  {
-    title: 'Private Transfers',
-    description: 'Door-to-door service from airport, port, or any location on the island.'
-  },
-  {
-    title: 'Island Tours',
-    description: 'Discover hidden gems and famous landmarks with our curated tours.'
-  },
-  {
-    title: '24/7 Availability',
-    description: 'We\'re here whenever you need us, day or night.'
-  },
-  {
-    title: 'Premium Comfort',
-    description: 'Travel in style with our modern, air-conditioned vehicles.'
-  }
-];
-
-onMounted(() => {
-  createContext(() => {
-    // Background parallax - continues from hero, shows lower part of image
-    gsap.to(bgRef.value, {
-      scrollTrigger: {
-        trigger: sectionRef.value,
-        start: 'top bottom',
-        end: 'bottom top',
-        scrub: 1
-      },
-      yPercent: -20,
-      ease: 'none'
-    });
-
-    // Heading animation
-    gsap.from(headingRef.value, {
-      scrollTrigger: {
-        trigger: sectionRef.value,
-        start: 'top 80%',
-        toggleActions: 'play none none reverse'
-      },
-      x: -80,
-      opacity: 0,
-      duration: 1,
-      ease: 'power3.out'
-    });
-
-    // Paragraphs staggered animation
-    gsap.from('.about-paragraph', {
-      scrollTrigger: {
-        trigger: paragraphsRef.value,
-        start: 'top 85%',
-        toggleActions: 'play none none reverse'
-      },
-      y: 50,
-      opacity: 0,
-      duration: 0.8,
-      stagger: 0.15,
-      ease: 'power2.out'
-    });
-
-    // Features cards animation
-    gsap.from('.feature-card', {
-      scrollTrigger: {
-        trigger: featuresRef.value,
-        start: 'top 80%',
-        toggleActions: 'play none none reverse'
-      },
-      y: 60,
-      opacity: 0,
-      duration: 0.6,
-      stagger: 0.1,
-      ease: 'power2.out'
-    });
-
-  }, sectionRef.value);
-});
+const { el: sectionEl, vis: inView }   = useInView(0.15);
+const { el: wheelEl,   vis: wheelVis } = useInView(0.1);
 </script>
 
 <template>
   <section
-    ref="sectionRef"
-    class="relative py-24 md:py-32 px-4 overflow-hidden min-h-screen"
+    id="about"
+    style="position:relative;overflow:hidden;padding:0;"
   >
-    <!-- Background Image - lower part of the same scenery from hero (NO overlay) -->
+    <!-- Layer2 parallax background -->
+    <div :style="{
+      position: 'absolute', inset: 0, zIndex: 0,
+      backgroundImage: `url(${layer2})`,
+      backgroundSize: 'cover',
+      backgroundPosition: 'center 60%',
+      backgroundAttachment: 'fixed',
+    }" />
+
+    <!-- Dark overlay -->
+    <div style="position:absolute;inset:0;z-index:1;background:linear-gradient(105deg,rgba(12,14,22,0.88) 0%,rgba(12,14,22,0.75) 55%,rgba(12,14,22,0.6) 100%);" />
+
+    <!-- Steering wheel decorative accent -->
     <div
-      ref="bgRef"
-      class="absolute inset-0 w-full will-change-transform"
-      style="height: 140%; top: -20%;"
+      ref="wheelEl"
+      :style="{
+        position: 'absolute',
+        right: '-60px', bottom: '-60px',
+        width: '420px', height: '420px',
+        zIndex: 2,
+        opacity: wheelVis ? 0.07 : 0,
+        transform: wheelVis ? 'rotate(15deg) scale(1)' : 'rotate(25deg) scale(0.85)',
+        transition: 'all 1.4s cubic-bezier(0.16,1,0.3,1)',
+        pointerEvents: 'none',
+        userSelect: 'none',
+      }"
     >
-      <img
-        :src="sceneryBg"
-        alt="Paros Scenery"
-        class="w-full h-full object-cover object-bottom"
-      />
+      <img :src="steeringWheel" alt="" style="width:100%;height:100%;object-fit:contain;filter:invert(1);" />
     </div>
 
-    <div class="max-w-6xl mx-auto relative z-10">
-      <!-- Heading - with local tint background -->
-      <div ref="headingRef" class="mb-12 md:mb-16 inline-block">
-        <div class="bg-etp-dark/70 backdrop-blur-sm rounded-2xl p-6 md:p-8">
-          <span class="text-etp-gold text-sm tracking-widest uppercase mb-4 block">About Us</span>
-          <h2 class="font-heading text-3xl md:text-5xl lg:text-6xl text-white leading-tight">
-            Your Journey,<br />
-            <span class="gradient-text">Our Passion</span>
-          </h2>
+    <!-- Main content -->
+    <div
+      ref="sectionEl"
+      class="about-inner"
+      :style="{
+        position: 'relative', zIndex: 3,
+        display: 'flex', gap: '72px',
+        maxWidth: '1000px', margin: '0 auto',
+        alignItems: 'center', flexWrap: 'wrap',
+        padding: '110px 60px',
+      }"
+    >
+      <!-- Photo cards -->
+      <div
+        class="about-photo-col"
+        :style="{
+          flex: '0 0 320px',
+          position: 'relative',
+          opacity: inView ? 1 : 0,
+          transform: inView ? 'translateX(0)' : 'translateX(-40px)',
+          transition: 'all 0.85s cubic-bezier(0.16,1,0.3,1)',
+        }"
+      >
+        <!-- Back card -->
+        <div style="position:absolute;top:40px;right:-24px;width:80%;border-radius:12px;overflow:hidden;border:1px solid rgba(232,201,126,0.2);box-shadow:0 16px 48px rgba(0,0,0,0.5);z-index:1;">
+          <img :src="privatePhoto" alt="Private chauffeur service" style="width:100%;height:220px;object-fit:cover;object-position:center;display:block;" />
         </div>
+        <!-- Front card -->
+        <div style="position:relative;border-radius:12px;overflow:hidden;border:1px solid rgba(255,255,255,0.12);box-shadow:0 32px 80px rgba(0,0,0,0.6);z-index:2;margin-right:40px;">
+          <img :src="vitoPhoto" alt="Mercedes Vito" style="width:100%;height:300px;object-fit:cover;object-position:center;display:block;background:#0a1628;" />
+          <div style="position:absolute;bottom:0;left:0;right:0;background:linear-gradient(to top,rgba(13,33,55,0.95),transparent);padding:24px 18px 14px;">
+            <div style="font-family:'DM Sans',sans-serif;font-size:10px;letter-spacing:0.16em;text-transform:uppercase;color:var(--gold);margin-bottom:3px;">Fleet</div>
+            <div style="font-family:'Cormorant Garamond',serif;font-size:16px;font-style:italic;color:rgba(255,255,255,0.9);">Mercedes Vito</div>
+          </div>
+        </div>
+        <!-- Gold accent border -->
+        <div style="position:absolute;width:120px;height:120px;bottom:-16px;left:-16px;border:1.5px solid rgba(232,201,126,0.35);border-radius:10px;z-index:0;pointer-events:none;" />
       </div>
 
-      <!-- Content Grid -->
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20">
-        <!-- Text Content - with local tint background -->
-        <div ref="paragraphsRef" class="bg-etp-dark/70 backdrop-blur-sm rounded-2xl p-6 md:p-8 space-y-6">
-          <p class="about-paragraph text-lg md:text-xl text-white/90 leading-relaxed">
-            Welcome to Express Transfer Paros, your trusted partner for premium transportation services on the beautiful island of Paros.
-          </p>
-          <p class="about-paragraph text-lg md:text-xl text-white/90 leading-relaxed">
-            With years of experience and deep local knowledge, we pride ourselves on delivering exceptional service that goes beyond just getting you from A to B.
-          </p>
-          <p class="about-paragraph text-lg md:text-xl text-white/90 leading-relaxed">
-            Whether you're arriving at the port or airport, exploring the island's stunning beaches, or discovering its rich history, we ensure every journey is comfortable, safe, and memorable.
-          </p>
+      <!-- Text content -->
+      <div :style="{
+        flex: 1, minWidth: '280px',
+        opacity: inView ? 1 : 0,
+        transform: inView ? 'translateX(0)' : 'translateX(40px)',
+        transition: 'all 0.85s cubic-bezier(0.16,1,0.3,1) 0.15s',
+      }">
+        <div style="font-family:'DM Sans',sans-serif;font-size:11px;letter-spacing:0.2em;text-transform:uppercase;color:var(--gold);margin-bottom:14px;font-weight:600;">
+          About Us
         </div>
-
-        <!-- Features Grid -->
-        <div ref="featuresRef" class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+        <h2 style="font-family:'Cormorant Garamond',serif;font-size:clamp(34px,4vw,52px);font-weight:600;color:#fff;line-height:1.12;margin-bottom:22px;">
+          Your Trusted Partner<br />on the Island
+        </h2>
+        <p style="font-family:'DM Sans',sans-serif;font-size:16px;line-height:1.8;color:rgba(255,255,255,0.72);margin-bottom:16px;">
+          We provide a seamless and reliable experience from the moment you arrive. From airport and port pickups to full-day private drivers, island tours, weddings, bachelor parties and more — every ride is tailored to your needs.
+        </p>
+        <p style="font-family:'DM Sans',sans-serif;font-size:16px;line-height:1.8;color:rgba(255,255,255,0.72);margin-bottom:32px;">
+          Our service reflects the warmth and hospitality of Paros itself. Professional, punctual, and personal.
+        </p>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
           <div
-            v-for="(feature, index) in features"
-            :key="index"
-            class="feature-card p-6 rounded-2xl bg-etp-dark/70 backdrop-blur-sm border border-white/10 hover:border-etp-gold/30 transition-colors duration-300"
+            v-for="v in ['Local Expertise','Always On Time','Transparent Pricing','Fluent in English']"
+            :key="v"
+            style="display:flex;align-items:center;gap:10px;"
           >
-            <h3 class="text-lg font-semibold text-white mb-2">{{ feature.title }}</h3>
-            <p class="text-white/70 text-sm">{{ feature.description }}</p>
+            <div style="width:7px;height:7px;border-radius:50%;background:var(--sea);flex-shrink:0;" />
+            <span style="font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;color:rgba(255,255,255,0.85);">{{ v }}</span>
           </div>
         </div>
       </div>
     </div>
   </section>
 </template>
-
-<style scoped>
-.gradient-text {
-  background: linear-gradient(135deg, #d9b16b 0%, #B4952E 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-.will-change-transform {
-  will-change: transform;
-}
-</style>

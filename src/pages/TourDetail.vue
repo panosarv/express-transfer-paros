@@ -23,6 +23,7 @@ import alykiImg      from '../assets/etp-alyki.jpg';
 import pisoImg       from '../assets/etp-piso-livadi.jpg';
 import monasteryImg  from '../assets/etp-monastery.png';
 import naousaImg     from '../assets/etp-naousa.jpg';
+import kolymbithresImg from '../assets/etp-kolympithres.jpg';
 
 const TOURS_DATA = {
   'history-tour': {
@@ -136,7 +137,7 @@ const TOURS_DATA = {
     tag: 'Bespoke',
     duration: 'Flexible',
     accent: '#7b5ea7',
-    heroImg: null,
+    heroImg: kalogerosImg,
     description: "Design your own Paros experience with a fully customisable itinerary. Choose from historical landmarks, scenic villages, secret beaches, and local culinary stops. Enjoy the flexibility to set your pace and personalise each stop with insights from our knowledgeable guides. Travel comfortably with a professional driver who knows the island's hidden gems. Create lasting memories on a tour that's uniquely yours.",
     features: [
       'Fully customisable itinerary', 'Local recommendations', 'Flexible schedule',

@@ -1,299 +1,449 @@
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue';
-import { useGsap } from '../../composables/useGsap';
 
-const heroRef = ref(null);
-const zoomWrapperRef = ref(null);
+const TOTAL_FRAMES = 80;
+const ANIMATION_MULTIPLIER = 5; // animation plays over 500dvh (unchanged speed)
+const DWELL_MULTIPLIER     = 0.5; // 200dvh hold at the end before scrolling past
+const SCROLL_MULTIPLIER    = ANIMATION_MULTIPLIER + DWELL_MULTIPLIER; // total section = 700dvh
+
+const outerRef  = ref(null);
 const canvasRef = ref(null);
-const brandRef = ref(null);
-const scrollIndicatorRef = ref(null);
-const aboutOverlayRef = ref(null);
 
-const { gsap, createContext } = useGsap();
-
-// Non-reactive state — never use ref() for these (performance critical)
-let frames = [];
-let ctx = null;
-let currentFrameIndex = 0;
+// Non-reactive — performance critical
+let imagesArr   = new Array(TOTAL_FRAMES).fill(null);
+let loadedArr   = new Array(TOTAL_FRAMES).fill(false);
+let rafId       = null;
+let progressVal = 0;
 let resizeTimer = null;
 
-// Static about content — plain array, not reactive
-const aboutFeatures = [
-  { title: 'Private Transfers', description: 'Door-to-door service from airport, port, or any location on the island.' },
-  { title: 'Island Tours', description: 'Discover hidden gems and famous landmarks with our curated tours.' },
-  { title: '24/7 Availability', description: "We're here whenever you need us, day or night." },
-  { title: 'Premium Comfort', description: 'Travel in style with our modern, air-conditioned vehicles.' }
-];
+// Reactive — drives UI re-renders
+const uiProgress   = ref(0);
+const mounted      = ref(false);
+const framesReady  = ref(false);
 
-// Resolve all frame URLs via Vite's asset pipeline (src/assets → hashed output URLs).
-// Sorted alphabetically so frame order matches filename order (001, 002, ..., 080).
+// Resolve all frame URLs via Vite asset pipeline
 const frameModules = import.meta.glob('../../assets/hero_frames/*.png', { eager: true });
 const allFramePaths = Object.keys(frameModules)
   .sort()
-  .map(key => frameModules[key].default);
+  .map(k => frameModules[k].default);
 
-// Load frames as HTMLImageElement objects.
-// isMobile=true loads every other frame (40 frames) to halve bandwidth.
-function preloadFrames(isMobile) {
-  const paths = isMobile
-    ? allFramePaths.filter((_, i) => i % 2 === 0)  // even indices → 40 frames
-    : allFramePaths;                                  // all frames
+/* ── Draw one frame onto the canvas ── */
+function drawFrame(frameIdx, scale = 1) {
+  const canvas = canvasRef.value;
+  if (!canvas) return;
+  const img = imagesArr[frameIdx];
+  if (!img) return;
 
-  return Promise.all(
-    paths.map(src => new Promise((resolve, reject) => {
-      const img = new Image();
-      img.onload = () => resolve(img);
-      img.onerror = () => reject(new Error(`Failed to load frame: ${src}`));
-      img.src = src;
-    }))
-  );
-}
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width;
+  const H = canvas.height;
+  ctx.clearRect(0, 0, W, H);
 
-// Set canvas pixel dimensions to match the section element.
-// Scales by devicePixelRatio so the canvas buffer matches physical pixels
-// on high-DPI screens — prevents blurry frames on retina/mobile displays.
-// No setTransform: drawFrame addresses physical pixels directly via canvas.width/height.
-function sizeCanvas() {
-  const dpr = window.devicePixelRatio || 1;
-  const w = heroRef.value.offsetWidth;
-  const h = heroRef.value.offsetHeight;
-  canvasRef.value.width        = w * dpr;
-  canvasRef.value.height       = h * dpr;
-  canvasRef.value.style.width  = w + 'px';
-  canvasRef.value.style.height = h + 'px';
-}
+  const isMobilePortrait = window.innerWidth < 768 && window.innerHeight > window.innerWidth;
+  const iw = img.naturalWidth  || 1920;
+  const ih = img.naturalHeight || 1080;
 
-// Draw a single frame onto the canvas using object-fit:cover math.
-// The image is scaled to fill the canvas, centred, with overflow cropped.
-function drawFrame(img) {
-  if (!ctx) return;
-  const cw = canvasRef.value.width;   // physical pixels
-  const ch = canvasRef.value.height;
-  ctx.clearRect(0, 0, cw, ch);
-  const scale = Math.max(cw / img.naturalWidth, ch / img.naturalHeight);
-  const sw = cw / scale;
-  const sh = ch / scale;
-  const sx = (img.naturalWidth  - sw) / 2;
-  const sy = (img.naturalHeight - sh) / 2;
-  ctx.drawImage(img, sx, sy, sw, sh, 0, 0, cw, ch);
-}
-
-onMounted(async () => {
-  const isMobile = window.innerWidth < 768;
-
-  // Pre-calculate frame count from the glob result — same logic as preloadFrames.
-  // This lets us set up GSAP (and its pin spacer) immediately, before frames load,
-  // so sibling sections' ScrollTriggers calculate correct positions from the start.
-  const totalFrames = isMobile
-    ? allFramePaths.filter((_, i) => i % 2 === 0).length
-    : allFramePaths.length;
-  const scrollDistance = totalFrames * 30;
-
-  // Initialise canvas 2D context
-  ctx = canvasRef.value.getContext('2d');
-
-  // Size canvas to fill the section
-  sizeCanvas();
-  window.addEventListener('resize', onResize);
-
-  // Set up GSAP synchronously NOW — before the async frame load below.
-  // This inserts the pin spacer into the DOM immediately, so any sibling
-  // section that creates its ScrollTrigger shortly after (e.g. StatsSection's
-  // setTimeout 100ms) will measure the correct page layout.
-  createContext(() => {
-    // Main ScrollTrigger timeline — drives all scroll-based effects
-    const tl = gsap.timeline({
-      scrollTrigger: {
-        trigger: heroRef.value,
-        start: 'top top',
-        end: `+=${scrollDistance}`,
-        pin: true,
-        scrub: true,
-        anticipatePin: 1,
-        onUpdate(self) {
-          // Guard: frames may still be loading when this first fires
-          if (!frames.length) return;
-          const index = Math.min(
-            Math.floor(self.progress * totalFrames),
-            totalFrames - 1
-          );
-          if (index !== currentFrameIndex) {
-            currentFrameIndex = index;
-            drawFrame(frames[index]);
-          }
-        }
-      }
-    });
-
-    // Mobile: start zoomed out to counteract the cover-math zoom on portrait screens.
-    // Landscape frames filling 100dvh portrait viewport are inherently ~1.28× zoomed —
-    // starting at 0.85 visually offsets that. Desktop starts at 1 (cover looks fine).
-    gsap.set(zoomWrapperRef.value, { scale: isMobile ? 0.85 : 1 });
-
-    // Zoom: canvas wrapper scales toward a slightly larger value over full scroll.
-    tl.to(zoomWrapperRef.value, {
-      scale: isMobile ? 0.88 : 1.05,
-      ease: 'none',
-      duration: 1
-    }, 0);
-
-    // Scroll indicator: fades out immediately on first scroll
-    tl.to(scrollIndicatorRef.value, {
-      opacity: 0,
-      ease: 'none',
-      duration: 0.06
-    }, 0);
-
-    // Brand name: full opacity at start, fades out by 12% scroll progress.
-    // fromTo with explicit from-value prevents any CSS/state conflicts.
-    tl.fromTo(brandRef.value,
-      { opacity: 1 },
-      { opacity: 0, ease: 'power2.in', duration: 0.12 },
-    0);
-
-    // About overlay: fades in over the last 25% of animation (progress 0.70 → 0.95).
-    // The hero canvas final frame acts as the background for the about content.
-    tl.fromTo(aboutOverlayRef.value,
-      { opacity: 0 },
-      { opacity: 1, ease: 'power2.out', duration: 0.25 },
-    0.70);
-
-  }, heroRef.value);
-
-  // Load frames asynchronously — the pin and tweens are already wired up above.
-  // Frames become available for onUpdate once this resolves.
-  try {
-    frames = await preloadFrames(isMobile);
-  } catch (error) {
-    console.error('Failed to preload hero frames:', error);
-    return;
+  let drawW, drawH, drawX, drawY;
+  if (isMobilePortrait) {
+    // contain width — letterbox (black bars top/bottom)
+    drawW = W;
+    drawH = W * (ih / iw);
+    drawX = 0;
+    drawY = (H - drawH) / 2;
+  } else {
+    // cover — fill, crop surplus; slight zoom with scale
+    const s = Math.max(W / iw, H / ih) * scale;
+    drawW = iw * s;
+    drawH = ih * s;
+    drawX = (W - drawW) / 2;
+    drawY = (H - drawH) / 2;
   }
 
-  // Draw frame 0 immediately so there's no blank canvas once frames arrive
-  drawFrame(frames[0]);
-});
-
-// Debounced resize: re-sizes canvas and redraws the current frame.
-// Debounce prevents excessive redraws during a continuous resize drag.
-function onResize() {
-  clearTimeout(resizeTimer);
-  resizeTimer = setTimeout(() => {
-    sizeCanvas();
-    if (frames[currentFrameIndex]) {
-      drawFrame(frames[currentFrameIndex]);
-    }
-  }, 100);
+  ctx.drawImage(img, drawX, drawY, drawW, drawH);
 }
 
-onUnmounted(() => {
-  window.removeEventListener('resize', onResize);
+/* ── Resize canvas to match viewport ── */
+function resizeCanvas() {
+  const canvas = canvasRef.value;
+  if (!canvas) return;
+  canvas.width  = window.innerWidth;
+  canvas.height = window.innerHeight;
+  const frameIdx = Math.min(TOTAL_FRAMES - 1, Math.floor(progressVal * (TOTAL_FRAMES - 1)));
+  drawFrame(frameIdx, 1 + progressVal * 0.05);
+}
+
+/* ── Scroll handler ── */
+function onScroll() {
+  if (!outerRef.value) return;
+  const rect            = outerRef.value.getBoundingClientRect();
+  const scrolled        = Math.max(0, -rect.top);
+  // Animation completes over the first ANIMATION_MULTIPLIER × vh of scroll;
+  // the remaining DWELL_MULTIPLIER × vh keeps p clamped at 1 (dwell).
+  const animScrollable  = (ANIMATION_MULTIPLIER - 1) * window.innerHeight;
+  const p               = Math.min(1, scrolled / animScrollable);
+  progressVal           = p;
+
+  if (rafId) cancelAnimationFrame(rafId);
+  rafId = requestAnimationFrame(() => {
+    const frameIdx = Math.min(TOTAL_FRAMES - 1, Math.floor(p * (TOTAL_FRAMES - 1)));
+    drawFrame(frameIdx, 1 + p * 0.05);
+    uiProgress.value = p;
+  });
+}
+
+/* ── Debounced resize ── */
+function onResize() {
   clearTimeout(resizeTimer);
-  // useGsap composable handles ScrollTrigger.kill() and context.revert() automatically
+  resizeTimer = setTimeout(resizeCanvas, 100);
+}
+
+onMounted(() => {
+  mounted.value = true;
+  resizeCanvas();
+
+  // Load frame 0 first, then the rest in sequence
+  const loadOne = (i) => new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => {
+      imagesArr[i]  = img;
+      loadedArr[i]  = true;
+      if (i === 0) {
+        resizeCanvas();
+        framesReady.value = true;
+      }
+      resolve();
+    };
+    img.onerror = resolve;
+    img.src = allFramePaths[i];
+  });
+
+  loadOne(0).then(() => {
+    for (let i = 1; i < TOTAL_FRAMES; i++) loadOne(i);
+  });
+
+  window.addEventListener('scroll', onScroll, { passive: true });
+  window.addEventListener('resize', onResize);
 });
+
+onUnmounted(() => {
+  window.removeEventListener('scroll', onScroll);
+  window.removeEventListener('resize', onResize);
+  if (rafId) cancelAnimationFrame(rafId);
+  clearTimeout(resizeTimer);
+});
+
+// UI derived values (computed inline in template via uiProgress)
 </script>
 
 <template>
+  <!-- Outer: full scroll height = 5 × 100dvh -->
   <section
-    ref="heroRef"
-    class="relative w-full overflow-hidden bg-black"
-    style="height: 100dvh;"
+    ref="outerRef"
+    class="hero-outer"
+    :style="{ height: `${SCROLL_MULTIPLIER * 100}dvh`, position: 'relative' }"
   >
-    <!-- Zoom wrapper: receives GSAP scale tween -->
-    <div
-      ref="zoomWrapperRef"
-      class="absolute inset-0"
-      style="will-change: transform;"
-    >
+    <!-- Mobile blend — top edge (merges with section above) -->
+    <div class="hero-edge-top" />
+    <!-- Mobile blend — bottom edge (merges with section below) -->
+    <div class="hero-edge-bottom" />
+    <!-- Sticky viewport: fixed to top while scrolling through outer -->
+    <div :style="{
+      position: 'sticky',
+      top: 0,
+      width: '100%',
+      height: '100dvh',
+      overflow: 'hidden',
+      background: '#000',
+    }">
+
+      <!-- Mobile vignette — top arc -->
+      <div class="mobile-vignette-top" />
+      <!-- Mobile vignette — bottom arc -->
+      <div class="mobile-vignette-bottom" />
+
+      <!-- Canvas: scroll-driven frame sequence -->
       <canvas
         ref="canvasRef"
-        class="absolute inset-0 w-full h-full"
+        :style="{
+          position: 'absolute',
+          inset: 0,
+          width: '100%',
+          height: '100%',
+          display: 'block',
+        }"
       />
-    </div>
 
-    <!-- Bottom vignette: static CSS, no JS -->
-    <div
-      class="absolute inset-0 z-10 pointer-events-none"
-      style="background: linear-gradient(to top, rgba(0,0,0,0.6) 0%, transparent 50%);"
-    />
-
-    <!-- Brand name overlay — opacity fully controlled by GSAP scrub timeline -->
-    <div
-      ref="brandRef"
-      class="absolute inset-0 z-20 flex items-center justify-center pointer-events-none"
-    >
-      <h1 class="font-heading text-5xl md:text-7xl text-white drop-shadow-lg text-center px-4">
-        Express Transfer Paros
-      </h1>
-    </div>
-
-    <!-- Scroll indicator -->
-    <div
-      ref="scrollIndicatorRef"
-      class="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center text-white/70"
-    >
-      <span class="text-sm mb-2 tracking-widest uppercase">Scroll</span>
-      <svg class="w-6 h-6 animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
-      </svg>
-    </div>
-
-    <!-- About overlay — fades in during the last 25% of the hero animation.
-         The final canvas frame serves as the background. -->
-    <div
-      ref="aboutOverlayRef"
-      class="absolute inset-0 z-30 flex flex-col justify-center px-6 md:px-16 lg:px-24 pointer-events-none overflow-y-auto"
-    >
-      <div class="max-w-6xl mx-auto w-full">
-
-        <!-- Heading -->
-        <div class="mb-6 md:mb-10">
-          <div class="bg-etp-dark/70 backdrop-blur-sm rounded-2xl p-5 md:p-8 inline-block">
-            <span class="text-etp-gold text-xs tracking-widest uppercase mb-3 block">About Us</span>
-            <h2 class="font-heading text-3xl md:text-5xl lg:text-6xl text-white leading-tight">
-              Your Journey,<br />
-              <span class="gradient-text">Our Passion</span>
-            </h2>
-          </div>
-        </div>
-
-        <!-- Content grid -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-12">
-
-          <!-- Description -->
-          <div class="bg-etp-dark/70 backdrop-blur-sm rounded-2xl p-5 md:p-8 space-y-4">
-            <p class="text-base md:text-lg text-white/90 leading-relaxed">
-              Welcome to Express Transfer Paros, your trusted partner for premium
-              transportation services on the beautiful island of Paros.
-            </p>
-            <p class="text-base md:text-lg text-white/90 leading-relaxed">
-              With years of experience and deep local knowledge, we deliver
-              exceptional service that goes beyond just getting you from A to B.
-            </p>
-          </div>
-
-          <!-- Feature cards -->
-          <div class="grid grid-cols-2 gap-3 md:gap-4">
-            <div
-              v-for="feature in aboutFeatures"
-              :key="feature.title"
-              class="p-4 md:p-5 rounded-2xl bg-etp-dark/70 backdrop-blur-sm border border-white/10"
-            >
-              <h3 class="text-sm md:text-base font-semibold text-white mb-1">{{ feature.title }}</h3>
-              <p class="text-white/70 text-xs md:text-sm leading-relaxed">{{ feature.description }}</p>
-            </div>
-          </div>
-
+      <!-- Brand pill — fades out at 12% scroll -->
+      <div :style="{
+        position: 'absolute',
+        top: 'clamp(80px, 10vh, 120px)',
+        left: 0,
+        right: 0,
+        zIndex: 20,
+        display: 'flex',
+        justifyContent: 'center',
+        opacity: mounted ? Math.max(0, 1 - uiProgress / 0.12) : 0,
+        transition: mounted ? 'none' : 'opacity 1s ease 0.6s',
+        pointerEvents: 'none',
+      }">
+        <div :style="{
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: '10px',
+          background: 'rgba(0,0,0,0.35)',
+          backdropFilter: 'blur(16px)',
+          WebkitBackdropFilter: 'blur(16px)',
+          border: '1px solid rgba(255,255,255,0.18)',
+          borderRadius: '100px',
+          padding: '7px 22px',
+        }">
+          <span :style="{
+            width: '7px', height: '7px', borderRadius: '50%',
+            background: 'var(--gold)',
+            display: 'inline-block',
+            boxShadow: '0 0 8px var(--gold)',
+          }" />
+          <span :style="{
+            fontFamily: '\'DM Sans\', sans-serif',
+            fontSize: 'clamp(10px, 1.2vw, 12px)',
+            letterSpacing: '0.2em',
+            textTransform: 'uppercase',
+            color: 'rgba(255,255,255,0.85)',
+          }">Express Transfer Paros</span>
+          <span :style="{
+            width: '7px', height: '7px', borderRadius: '50%',
+            background: 'var(--gold)',
+            display: 'inline-block',
+            boxShadow: '0 0 8px var(--gold)',
+          }" />
         </div>
       </div>
+
+      <!-- Scroll hint — fades out at 8% scroll -->
+      <div :style="{
+        position: 'absolute',
+        bottom: '44px',
+        left: '50%',
+        transform: 'translateX(-50%)',
+        zIndex: 20,
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        gap: '8px',
+        opacity: mounted ? Math.max(0, 1 - uiProgress / 0.08) : 0,
+        pointerEvents: 'none',
+      }">
+        <span :style="{
+          fontFamily: '\'DM Sans\', sans-serif',
+          fontSize: '10px',
+          letterSpacing: '0.28em',
+          textTransform: 'uppercase',
+          color: 'rgba(255,255,255,0.65)',
+        }">Scroll to Discover</span>
+        <div class="scroll-line" :style="{
+          width: '1px',
+          height: '48px',
+          background: 'linear-gradient(to bottom, rgba(255,255,255,0.65), transparent)',
+        }" />
+      </div>
+
+      <!-- Title overlay — appears over last 25% (75% → 100%) -->
+      <div :style="{
+        position: 'absolute',
+        inset: 0,
+        zIndex: 15,
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        paddingBottom: 'clamp(60px, 10vh, 100px)',
+        paddingLeft: 'clamp(20px, 5vw, 60px)',
+        paddingRight: 'clamp(20px, 5vw, 60px)',
+        opacity: Math.max(0, (uiProgress - 0.75) / 0.25),
+        transform: `translateY(${(1 - Math.min(1, (uiProgress - 0.75) / 0.25)) * 40}px)`,
+        willChange: 'opacity, transform',
+        pointerEvents: Math.max(0, (uiProgress - 0.75) / 0.25) > 0.4 ? 'auto' : 'none',
+        background: `rgba(0,0,0,${Math.max(0, (uiProgress - 0.75) / 0.25) * 0.22})`,
+      }">
+        <h1 :style="{
+          fontFamily: '\'Cormorant Garamond\', serif',
+          fontWeight: 300,
+          fontSize: 'clamp(48px, 8.5vw, 118px)',
+          color: '#fff',
+          textAlign: 'center',
+          lineHeight: 0.93,
+          letterSpacing: '-0.01em',
+          margin: '0 0 6px',
+          textShadow: '0 4px 60px rgba(0,0,0,0.5)',
+        }">
+          Express<br />
+          <em :style="{ fontStyle: 'italic', fontWeight: 600, color: 'var(--gold)' }">Transfer</em><br />
+          Paros
+        </h1>
+
+        <p :style="{
+          fontFamily: '\'DM Sans\', sans-serif',
+          fontSize: 'clamp(11px, 1.4vw, 16px)',
+          fontWeight: 300,
+          color: 'rgba(255,255,255,0.75)',
+          letterSpacing: '0.26em',
+          textTransform: 'uppercase',
+          textShadow: '0 2px 20px rgba(0,0,0,0.6)',
+          margin: 'clamp(14px, 2.5vh, 20px) 0 0',
+          textAlign: 'center',
+        }">
+          Arrive in Style · Explore the Aegean
+        </p>
+      </div>
+
+      <!-- Stats bar — appears at 82%+ scroll -->
+      <div :style="{
+        position: 'absolute',
+        bottom: 0, left: 0, right: 0,
+        zIndex: 16,
+        opacity: Math.max(0, (uiProgress - 0.82) / 0.18),
+        transform: `translateY(${(1 - Math.max(0, (uiProgress - 0.82) / 0.18)) * 20}px)`,
+        willChange: 'opacity, transform',
+        pointerEvents: 'none',
+      }">
+        <div :style="{
+          display: 'flex',
+          background: 'rgba(8,10,20,0.6)',
+          backdropFilter: 'blur(24px)',
+          WebkitBackdropFilter: 'blur(24px)',
+          borderTop: '1px solid rgba(255,255,255,0.08)',
+        }">
+          <div
+            v-for="(stat, i) in [
+              { num: '10,000+', label: 'Happy Clients' },
+              { num: '3+',    label: 'Years on Paros' },
+              { num: '24 / 7', label: 'Available' },
+              { num: '5 ★',   label: 'Google Rating' },
+            ]"
+            :key="i"
+            :style="{
+              flex: 1,
+              padding: 'clamp(12px, 2vh, 18px) 0',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: '3px',
+              borderRight: i < 3 ? '1px solid rgba(255,255,255,0.07)' : 'none',
+            }"
+          >
+            <span :style="{
+              fontFamily: '\'Cormorant Garamond\', serif',
+              fontSize: 'clamp(18px, 3vw, 28px)',
+              fontWeight: 600,
+              color: 'var(--gold)',
+              lineHeight: 1,
+            }">{{ stat.num }}</span>
+            <span :style="{
+              fontFamily: '\'DM Sans\', sans-serif',
+              fontSize: 'clamp(9px, 1vw, 10px)',
+              color: 'rgba(255,255,255,0.5)',
+              letterSpacing: '0.14em',
+              textTransform: 'uppercase',
+            }">{{ stat.label }}</span>
+          </div>
+        </div>
+      </div>
+
     </div>
   </section>
 </template>
 
 <style scoped>
-.gradient-text {
-  background: linear-gradient(135deg, #d9b16b 0%, #B4952E 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+@keyframes scrollPulse {
+  0%, 100% { opacity: 0.65; transform: scaleY(1); }
+  50%       { opacity: 0.25; transform: scaleY(0.7); }
+}
+.scroll-line {
+  animation: scrollPulse 2s ease-in-out infinite;
+}
+
+/* Mobile-only vignettes — hidden on desktop */
+.mobile-vignette-top,
+.mobile-vignette-bottom,
+.hero-edge-top,
+.hero-edge-bottom {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  /* Top: wide elliptical arc darkening the upper corners,
+     brightest at the very top edges, fading toward centre */
+  .mobile-vignette-top {
+    display: block;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 42%;
+    z-index: 5;
+    pointer-events: none;
+    background: radial-gradient(
+      ellipse 120% 80% at 50% -10%,
+      rgba(18, 18, 18, 0.82) 0%,
+      rgba(18, 18, 18, 0.55) 30%,
+      rgba(18, 18, 18, 0.18) 60%,
+      transparent 100%
+    );
+  }
+
+  /* Bottom: matching arc rising from below */
+  .mobile-vignette-bottom {
+    display: block;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 42%;
+    z-index: 5;
+    pointer-events: none;
+    background: radial-gradient(
+      ellipse 120% 80% at 50% 110%,
+      rgba(18, 18, 18, 0.82) 0%,
+      rgba(18, 18, 18, 0.55) 30%,
+      rgba(18, 18, 18, 0.18) 60%,
+      transparent 100%
+    );
+  }
+
+  /* Edge blends — sit in the document flow outside the sticky viewport,
+     so they're visible exactly when scrolling into / out of the hero */
+  .hero-edge-top {
+    display: block;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 120px;
+    z-index: 10;
+    pointer-events: none;
+    background: linear-gradient(
+      to bottom,
+      rgba(18, 18, 18, 0.92) 0%,
+      rgba(18, 18, 18, 0.5) 50%,
+      transparent 100%
+    );
+  }
+
+  .hero-edge-bottom {
+    display: block;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 120px;
+    z-index: 10;
+    pointer-events: none;
+    background: linear-gradient(
+      to top,
+      rgba(18, 18, 18, 0.92) 0%,
+      rgba(18, 18, 18, 0.5) 50%,
+      transparent 100%
+    );
+  }
 }
 </style>

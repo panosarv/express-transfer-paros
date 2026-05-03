@@ -1,217 +1,201 @@
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue';
-import { useGsap } from '../../composables/useGsap';
+import fleetImg   from '../../assets/Fleet-ETP.png';
+import carImg     from '../../assets/CarMoving-ETP.png';
+import skodaImg from '../../assets/skodaSkala.png';
 
-const sectionRef         = ref(null);
-const canvasContainerRef = ref(null);
-const canvasRef          = ref(null);
-
-const { gsap, ScrollTrigger, createContext } = useGsap();
-
-// Non-reactive — performance critical
-let frames            = [];
-let ctx               = null;
-let currentFrameIndex = 0;
-let resizeTimer       = null;
-
-const features = [
-  { number: '8',    label: 'Passenger Seats' },
-  { number: '4',    label: 'Premium Vehicles' },
-  { number: '24/7', label: 'Availability' }
+const VEHICLES = [
+  {
+    name: 'Mercedes Vito',
+    capacity: 'Up to 8 passengers',
+    features: ['Spacious cabin', 'Premium leather', 'Climate control', 'Ample luggage space'],
+    ideal: 'Groups & Family Travel',
+    badge: 'Most Popular',
+    img: carImg,
+  },
+  {
+    name: 'Skoda Scala',
+    capacity: 'Up to 4 passengers',
+    features: ['Comfortable seating', 'Modern interior', 'Air conditioning', 'Boot storage'],
+    ideal: 'Couples & Small Groups',
+    badge: 'Economy Option',
+    img: skodaImg,
+  },
 ];
 
-const amenities = [
-  'Air Conditioning',
-  'Leather Seats',
-  'USB Charging',
-  'Luggage Space',
-  'WiFi Available'
-];
+// ── FleetDrawIn: SVG displacement + clip-path reveal ──
+const drawRef      = ref(null);
+const drawProgress = ref(0);
+let rafRef = null;
+let drawStarted = false;
 
-// Resolve frame URLs via Vite asset pipeline
-const frameModules = import.meta.glob('../../assets/carwire_frames/*.png', { eager: true });
-const allFramePaths = Object.keys(frameModules)
-  .sort()
-  .map(key => frameModules[key].default);
-
-// Mobile: every other frame (60 frames) to halve bandwidth
-function preloadFrames(isMobile) {
-  const paths = isMobile
-    ? allFramePaths.filter((_, i) => i % 2 === 0)
-    : allFramePaths;
-
-  return Promise.all(
-    paths.map(src => new Promise((resolve, reject) => {
-      const img = new Image();
-      img.onload  = () => resolve(img);
-      img.onerror = () => reject(new Error(`Failed to load frame: ${src}`));
-      img.src = src;
-    }))
-  );
+function easeInOutCubic(p) {
+  return p < 0.5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2;
 }
 
-// Size canvas to match its container at physical (DPR) resolution
-function sizeCanvas() {
-  if (!canvasContainerRef.value) return;
-  const dpr = window.devicePixelRatio || 1;
-  const w   = canvasContainerRef.value.offsetWidth;
-  const h   = canvasContainerRef.value.offsetHeight;
-  canvasRef.value.width        = w * dpr;
-  canvasRef.value.height       = h * dpr;
-  canvasRef.value.style.width  = w + 'px';
-  canvasRef.value.style.height = h + 'px';
-}
-
-// object-fit: contain — shows the full car, dark background fills the rest
-function drawFrame(img) {
-  if (!ctx) return;
-  const cw = canvasRef.value.width;   // physical pixels
-  const ch = canvasRef.value.height;
-  ctx.clearRect(0, 0, cw, ch);
-  const scale = Math.min(cw / img.naturalWidth, ch / img.naturalHeight);
-  const dw = img.naturalWidth  * scale;
-  const dh = img.naturalHeight * scale;
-  const dx = (cw - dw) / 2;
-  const dy = (ch - dh) / 2;
-  ctx.drawImage(img, 0, 0, img.naturalWidth, img.naturalHeight, dx, dy, dw, dh);
-}
-
-onMounted(async () => {
-  const isMobile    = window.innerWidth < 768;
-  const totalFrames = isMobile
-    ? allFramePaths.filter((_, i) => i % 2 === 0).length
-    : allFramePaths.length;
-
-  ctx = canvasRef.value.getContext('2d');
-  sizeCanvas();
-  window.addEventListener('resize', onResize);
-
-  // Pin the section and drive the animation with a scroll distance proportional
-  // to frame count — guarantees all frames play before the user can scroll past.
-  const scrollDistance = totalFrames * 15; // ~1800px desktop, ~900px mobile
-
-  createContext(() => {
-    ScrollTrigger.create({
-      trigger: sectionRef.value,
-      start: 'top top',
-      end: `+=${scrollDistance}`,
-      pin: true,
-      anticipatePin: 1,
-      scrub: true,
-      onUpdate(self) {
-        if (!frames.length) return;
-        const index = Math.min(
-          Math.floor(self.progress * totalFrames),
-          totalFrames - 1
-        );
-        if (index !== currentFrameIndex) {
-          currentFrameIndex = index;
-          drawFrame(frames[index]);
-        }
-      }
-    });
-  }, sectionRef.value);
-
-  // Load frames — ScrollTrigger is already wired; onUpdate guard handles loading window
-  try {
-    frames = await preloadFrames(isMobile);
-  } catch (error) {
-    console.error('Failed to preload fleet frames:', error);
-    return;
+function startDraw() {
+  if (drawStarted) return;
+  drawStarted = true;
+  let start = null;
+  const dur = 2400;
+  function run(t) {
+    if (!start) start = t;
+    const p = Math.min(1, (t - start) / dur);
+    drawProgress.value = easeInOutCubic(p);
+    if (p < 1) rafRef = requestAnimationFrame(run);
   }
-
-  drawFrame(frames[0]);
-
-  // By the time frames finish loading, all sibling sections (StatsSection etc.)
-  // have completed their deferred GSAP setup and added their pin spacers.
-  // Refresh so this trigger recalculates against the final page layout.
-  ScrollTrigger.refresh();
-});
-
-function onResize() {
-  clearTimeout(resizeTimer);
-  resizeTimer = setTimeout(() => {
-    sizeCanvas();
-    ScrollTrigger.refresh();
-    if (frames[currentFrameIndex]) drawFrame(frames[currentFrameIndex]);
-  }, 100);
+  rafRef = requestAnimationFrame(run);
 }
 
-onUnmounted(() => {
-  window.removeEventListener('resize', onResize);
-  clearTimeout(resizeTimer);
+const sectionRef = ref(null);
+const inView     = ref(false);
+const hovCard    = ref(-1);
+
+onMounted(() => {
+  const sectionObs = new IntersectionObserver(([e]) => {
+    if (e.isIntersecting) { inView.value = true; sectionObs.disconnect(); }
+  }, { threshold: 0.1 });
+  if (sectionRef.value) sectionObs.observe(sectionRef.value);
+
+  // drawRef is available after mount
+  const drawObs = new IntersectionObserver(([e]) => {
+    if (e.isIntersecting) { startDraw(); drawObs.disconnect(); }
+  }, { threshold: 0.3 });
+  if (drawRef.value) drawObs.observe(drawRef.value);
 });
+
+onUnmounted(() => { if (rafRef) cancelAnimationFrame(rafRef); });
 </script>
 
 <template>
   <section
+    id="fleet"
     ref="sectionRef"
-    class="relative py-24 md:py-32 px-4 bg-etp-dark overflow-hidden"
+    style="
+      background: var(--navy);
+      padding: clamp(64px,8vw,120px) clamp(20px,5vw,80px) 80px;
+      text-align: center;
+    "
   >
-    <div class="max-w-6xl mx-auto">
+    <!-- Header -->
+    <div style="font-family:'DM Sans',sans-serif;font-size:11px;letter-spacing:0.2em;text-transform:uppercase;color:var(--gold);margin-bottom:14px;font-weight:600;">
+      Our Fleet
+    </div>
+    <h2 style="font-family:'Cormorant Garamond',serif;font-size:clamp(36px,5vw,56px);font-weight:600;color:#fff;line-height:1.15;margin:0 0 16px;">
+      Travel in Comfort
+    </h2>
+    <p style="font-family:'DM Sans',sans-serif;font-size:17px;color:rgba(255,255,255,0.55);line-height:1.7;max-width:560px;margin:0 auto 64px;">
+      Every vehicle is maintained to the highest standard — clean, air-conditioned, and driven by a professional local chauffeur.
+    </p>
 
-      <!-- Heading -->
-      <div class="fleet-heading text-center mb-12 md:mb-16">
-        <span class="text-etp-gold text-sm tracking-widest uppercase mb-4 block">Our Fleet</span>
-        <h2 class="font-heading text-3xl md:text-5xl text-white">
-          Travel in <span class="text-etp-gold">Style & Comfort</span>
-        </h2>
+    <!-- FleetDrawIn featured image -->
+    <div
+      ref="drawRef"
+      :style="{
+        maxWidth: '640px',
+        margin: '0 auto 64px',
+        position: 'relative',
+        opacity: inView ? 1 : 0,
+        transform: inView ? 'scale(1)' : 'scale(0.95)',
+        transition: 'all 0.8s ease',
+        background: 'rgba(13,33,55,0.95)',
+        borderRadius: '16px',
+        overflow: 'hidden',
+        border: '1px solid rgba(255,255,255,0.08)',
+        boxShadow: '0 32px 80px rgba(0,0,0,0.5)',
+      }"
+    >
+      <!-- Hidden SVG displacement filter -->
+      <svg style="position:absolute;width:0;height:0;overflow:hidden;" aria-hidden="true">
+        <defs>
+          <filter id="fleet-draw-filter" x="-12%" y="-12%" width="124%" height="124%">
+            <feTurbulence type="turbulence" baseFrequency="0.022 0.038" numOctaves="3" seed="7" result="noise" />
+            <feDisplacementMap
+              in="SourceGraphic" in2="noise"
+              :scale="Math.round((1 - drawProgress) * 22)"
+              xChannelSelector="R" yChannelSelector="G"
+            />
+          </filter>
+        </defs>
+      </svg>
+
+      <!-- Clipped + displaced image -->
+      <div :style="{
+        clipPath: `inset(${(1 - drawProgress) * 50}% round 10px)`,
+        filter: drawProgress < 0.98 ? 'url(#fleet-draw-filter)' : 'none',
+        willChange: 'clip-path, filter',
+      }">
+        <img :src="fleetImg" alt="Mercedes Vito — Interior view" style="width:100%;display:block;mix-blend-mode:multiply;" />
       </div>
 
-      <!-- Canvas — replaces the static car image, same container dimensions -->
+      <!-- Caption bar -->
+      <div style="padding:18px 24px 20px;display:flex;justify-content:space-between;align-items:center;border-top:1px solid rgba(255,255,255,0.06);">
+        <div>
+          <div style="font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:600;color:#fff;">Mercedes Vito — Interior</div>
+          <div style="font-family:'DM Sans',sans-serif;font-size:12px;color:rgba(255,255,255,0.4);letter-spacing:0.08em;margin-top:3px;">8-Seat Configuration · Panoramic top view</div>
+        </div>
+        <div style="display:flex;gap:2px;">
+          <span v-for="n in 5" :key="n" style="color:var(--gold);font-size:14px;">★</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Vehicle cards -->
+    <div
+      class="vehicle-cards-grid"
+      style="display:flex;gap:24px;flex-wrap:wrap;justify-content:center;max-width:900px;margin:0 auto;"
+    >
       <div
-        ref="canvasContainerRef"
-        class="relative mx-auto max-w-4xl mb-12 md:mb-16"
-        style="aspect-ratio: 16/9;"
+        v-for="(v, i) in VEHICLES"
+        :key="v.name"
+        @mouseenter="hovCard = i"
+        @mouseleave="hovCard = -1"
+        :style="{
+          flex: '1 1 360px',
+          maxWidth: '420px',
+          background: '#0d2137',
+          borderRadius: '16px',
+          overflow: 'hidden',
+          position: 'relative',
+          border: hovCard === i ? '1px solid var(--gold)' : '1px solid rgba(255,255,255,0.1)',
+          boxShadow: hovCard === i ? '0 24px 60px rgba(0,0,0,0.4)' : '0 4px 24px rgba(0,0,0,0.2)',
+          opacity: inView ? 1 : 0,
+          transform: inView ? 'translateY(0)' : 'translateY(40px)',
+          transition: `opacity 0.7s cubic-bezier(0.16,1,0.3,1) ${i*150}ms, transform 0.7s cubic-bezier(0.16,1,0.3,1) ${i*150}ms, box-shadow 0.3s ease, border 0.3s ease`,
+        }"
       >
-        <canvas
-          ref="canvasRef"
-          class="absolute inset-0"
-          style="background: transparent;"
-        />
-      </div>
+        <!-- Badge -->
+        <div style="position:absolute;top:16px;right:16px;z-index:2;background:var(--sea);color:#fff;font-family:'DM Sans',sans-serif;font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;padding:5px 12px;border-radius:100px;">
+          {{ v.badge }}
+        </div>
 
-      <!-- Features Grid -->
-      <div class="grid grid-cols-3 gap-4 md:gap-8 mb-12 md:mb-16">
-        <div
-          v-for="(feature, index) in features"
-          :key="index"
-          class="fleet-feature text-center"
-        >
-          <div class="text-3xl md:text-5xl font-heading text-etp-gold mb-2">
-            {{ feature.number }}
+        <!-- Car image -->
+        <div style="height:220px;background:#0a1628;position:relative;overflow:hidden;">
+          <div style="position:absolute;bottom:12px;left:16px;font-family:'DM Sans',sans-serif;font-size:11px;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;color:rgba(255,255,255,0.5);z-index:1;">
+            {{ v.name }}
           </div>
-          <div class="text-white/70 text-sm md:text-base uppercase tracking-wider">
-            {{ feature.label }}
+          <img :src="v.img" :alt="v.name" style="width:100%;height:100%;object-fit:contain;object-position:center;padding:16px 20px;" />
+        </div>
+
+        <!-- Details -->
+        <div style="padding:24px 28px 28px;">
+          <div style="font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:600;color:#fff;margin-bottom:4px;">{{ v.name }}</div>
+          <div style="font-family:'DM Sans',sans-serif;font-size:14px;color:rgba(255,255,255,0.45);margin-bottom:8px;">{{ v.capacity }}</div>
+          <div style="font-family:'DM Sans',sans-serif;font-size:13px;color:var(--gold);margin-bottom:16px;">
+            Ideal for: <strong>{{ v.ideal }}</strong>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+            <div
+              v-for="f in v.features"
+              :key="f"
+              style="display:flex;align-items:center;gap:8px;font-family:'DM Sans',sans-serif;font-size:13px;color:rgba(255,255,255,0.65);"
+            >
+              <div style="width:6px;height:6px;border-radius:50%;background:var(--sea);flex-shrink:0;" />
+              {{ f }}
+            </div>
           </div>
         </div>
       </div>
-
-      <!-- Description -->
-      <div class="fleet-description max-w-3xl mx-auto text-center">
-        <p class="text-white/80 text-lg md:text-xl leading-relaxed mb-6">
-          Our Mercedes V-Class vehicles offer the perfect blend of luxury and practicality.
-          With spacious interiors, premium leather seating, and climate control, every journey
-          becomes an experience worth remembering.
-        </p>
-        <ul class="flex flex-wrap justify-center gap-4 md:gap-6 text-white/60 text-sm">
-          <li
-            v-for="amenity in amenities"
-            :key="amenity"
-            class="flex items-center"
-          >
-            <svg class="w-4 h-4 text-etp-gold mr-2" fill="currentColor" viewBox="0 0 20 20">
-              <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
-            </svg>
-            {{ amenity }}
-          </li>
-        </ul>
-      </div>
-
     </div>
-
-    <!-- Decorative glows -->
-    <div class="absolute top-0 left-0 w-64 h-64 bg-etp-gold/5 rounded-full blur-3xl pointer-events-none"></div>
-    <div class="absolute bottom-0 right-0 w-96 h-96 bg-etp-gold/5 rounded-full blur-3xl pointer-events-none"></div>
   </section>
 </template>
