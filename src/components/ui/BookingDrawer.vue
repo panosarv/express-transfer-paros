@@ -335,6 +335,11 @@ const customTourDurationIsValid = computed(() => {
   return customBusinessDecide.value || !!customHours.value;
 });
 
+const isPhoneValid = computed(() => {
+  if (!form.phone) return true; // empty is caught by required check
+  return /^\+[1-9]\d{6,14}$/.test(form.phone.replace(/[\s\-().]/g, ''));
+});
+
 const canNext = computed(() => {
   if (step.value === 1) {
     return !!form.type && (form.type !== 'tour' || !!form.tourType);
@@ -358,11 +363,11 @@ const canNext = computed(() => {
   }
 
   if (step.value === 3 && form.type === 'tour') {
-    return !!form.name && !!form.surname && !!form.phone && !!form.email;
+    return !!form.name && !!form.surname && !!form.phone && isPhoneValid.value && !!form.email;
   }
 
   if (step.value === 4) {
-    return !!form.name && !!form.surname && !!form.phone && !!form.email;
+    return !!form.name && !!form.surname && !!form.phone && isPhoneValid.value && !!form.email;
   }
 
   return false;
@@ -1397,7 +1402,16 @@ onUnmounted(() => {
 
                   <div class="field-group">
                     <label class="field-label">Phone / WhatsApp</label>
-                    <input v-model="form.phone" class="text-input" placeholder="+30 or international" />
+                    <input
+                      v-model="form.phone"
+                      class="text-input"
+                      :class="{ 'input-error': form.phone && !isPhoneValid }"
+                      placeholder="+30 694 000 0000"
+                      type="tel"
+                    />
+                    <p v-if="form.phone && !isPhoneValid" class="field-error">
+                      Please use international format — start with + and country code (e.g. +30 694 000 0000)
+                    </p>
                   </div>
 
                   <div class="field-group">
@@ -2111,6 +2125,18 @@ onUnmounted(() => {
   color: rgba(255, 220, 220, 0.9);
   font-family: 'DM Sans', sans-serif;
   font-size: 12px;
+  line-height: 1.5;
+}
+
+.input-error {
+  border-color: rgba(255, 80, 80, 0.5) !important;
+}
+
+.field-error {
+  margin: 6px 0 0;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 11px;
+  color: rgba(255, 140, 140, 0.9);
   line-height: 1.5;
 }
 
