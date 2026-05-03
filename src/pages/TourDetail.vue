@@ -7,7 +7,6 @@ import BookingDrawer from '../components/ui/BookingDrawer.vue';
 
 import historyImg    from '../assets/etp-history-tour.jpg';
 import beachImg      from '../assets/etp-drios.jpg';
-import halfDayImg    from '../assets/etp-alyki.jpg';
 import fullDayImg    from '../assets/etp-fullday-tour.jpeg';
 import arcMuseumImg  from '../assets/etp-museum.jpg';
 import folkloreImg   from '../assets/etp-museum-folk.jpg';
@@ -83,7 +82,7 @@ const TOURS_DATA = {
     tag: 'Half Day',
     duration: 'Minimum 4 hours',
     accent: '#2a7a4e',
-    heroImg: halfDayImg,
+    heroImg: alykiImg,
     description: "Begin in the quaint fishing village of Alyki, strolling its harbor and soaking up the authentic Cycladic atmosphere. Continue to Golden Beach to admire its famous golden sands and crystal-clear waters, stopping for photos or a quick shore walk. Then visit the seaside settlements of Piso Livadi and Logaras for a glimpse of local fishing life and a beachside coffee break. Pause at the hilltop Agios Antonios Monastery above Marpissa for panoramic island and sea views and a peaceful wander. Finish your half-day journey exploring the charming mountain village of Lefkes before choosing to conclude in either stylish Naoussa or historic Parikia.",
     features: [
       'Pick up from your location', 'Professional Driver', 'Local Knowledge',
