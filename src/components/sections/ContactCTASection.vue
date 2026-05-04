@@ -1,5 +1,6 @@
 <script setup>
 import { ref, onMounted } from 'vue';
+import { trackPhoneClick, trackEvent } from '../../utils/analytics';
 
 const emit = defineEmits(['book']);
 
@@ -58,7 +59,7 @@ const hovWa   = ref(false);
       }">
         <!-- Book a Transfer -->
         <button
-          @click="emit('book')"
+          @click="trackEvent('book_button_click', { source: 'contact_cta' }); emit('book')"
           @mouseenter="hovBook = true"
           @mouseleave="hovBook = false"
           :style="{
@@ -84,6 +85,7 @@ const hovWa   = ref(false);
           rel="noopener noreferrer"
           @mouseenter="hovWa = true"
           @mouseleave="hovWa = false"
+          @click="trackPhoneClick('contact_cta', 'whatsapp')"
           :style="{
             padding: '16px 32px',
             background: '#25D366',

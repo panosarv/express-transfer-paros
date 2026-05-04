@@ -1,25 +1,13 @@
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue';
+import { ref } from 'vue';
+import { trackPhoneClick } from '../../utils/analytics';
 
 const emit = defineEmits(['book']);
 
-const visible = ref(false);
+const visible = ref(true);
 const hovBook = ref(false);
 const hovWa   = ref(false);
 const hovCall = ref(false);
-
-function onScroll() {
-  visible.value = window.scrollY > window.innerHeight * 0.2;
-}
-
-onMounted(() => {
-  window.addEventListener('scroll', onScroll, { passive: true });
-  onScroll();
-});
-
-onUnmounted(() => {
-  window.removeEventListener('scroll', onScroll);
-});
 </script>
 
 <template>
@@ -92,6 +80,7 @@ onUnmounted(() => {
       rel="noopener noreferrer"
       @mouseenter="hovWa = true"
       @mouseleave="hovWa = false"
+      @click="trackPhoneClick('sticky_bar', 'whatsapp')"
       class="flex items-center justify-center w-12 h-12 rounded-full flex-shrink-0 transition-all duration-300 no-underline"
       :style="{
         background: hovWa ? '#25D366' : 'rgba(13,33,55,0.75)',
@@ -112,6 +101,7 @@ onUnmounted(() => {
       href="tel:+306980911843"
       @mouseenter="hovCall = true"
       @mouseleave="hovCall = false"
+      @click="trackPhoneClick('sticky_bar', 'tel')"
       class="flex items-center justify-center w-12 h-12 rounded-full flex-shrink-0 transition-all duration-300 no-underline"      :style="{
         background: hovCall ? 'rgba(232,201,126,0.18)' : 'rgba(13,33,55,0.75)',
         border: '1.5px solid rgba(232,201,126,0.4)',

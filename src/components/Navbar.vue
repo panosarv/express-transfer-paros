@@ -1,5 +1,6 @@
 <script setup>
 import { ref, onMounted, onUnmounted, nextTick } from 'vue';
+import { trackEvent } from '../utils/analytics';
 import { useRouter, useRoute } from 'vue-router';
 import logoSrc from '../assets/etp-logo.png';
 
@@ -93,6 +94,7 @@ async function scrollTo(id) {
 
 function handleBook() {
   menuOpen.value = false;
+  trackEvent('book_button_click', { source: 'navbar' });
   emit('book');
 }
 

@@ -2,7 +2,7 @@
 import { ref, onMounted, onUnmounted } from 'vue';
 
 const TOTAL_FRAMES = 80;
-const ANIMATION_MULTIPLIER = 5; // animation plays over 500dvh (unchanged speed)
+const ANIMATION_MULTIPLIER = 3; // animation plays over 500dvh (unchanged speed)
 const DWELL_MULTIPLIER     = 0.5; // 200dvh hold at the end before scrolling past
 const SCROLL_MULTIPLIER    = ANIMATION_MULTIPLIER + DWELL_MULTIPLIER; // total section = 700dvh
 
@@ -219,32 +219,27 @@ onUnmounted(() => {
         </div>
       </div>
 
-      <!-- Scroll hint — fades out at 8% scroll -->
-      <div :style="{
-        position: 'absolute',
-        bottom: '44px',
-        left: '50%',
-        transform: 'translateX(-50%)',
-        zIndex: 20,
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        gap: '8px',
-        opacity: mounted ? Math.max(0, 1 - uiProgress / 0.08) : 0,
-        pointerEvents: 'none',
-      }">
-        <span :style="{
-          fontFamily: '\'DM Sans\', sans-serif',
-          fontSize: '10px',
-          letterSpacing: '0.28em',
-          textTransform: 'uppercase',
-          color: 'rgba(255,255,255,0.65)',
-        }">Scroll to Discover</span>
-        <div class="scroll-line" :style="{
-          width: '1px',
-          height: '48px',
-          background: 'linear-gradient(to bottom, rgba(255,255,255,0.65), transparent)',
-        }" />
+      <!-- Scroll hint — bottom right (desktop) / below brand pill (mobile) -->
+      <div
+        class="scroll-hint"
+        :style="{
+          opacity: mounted ? Math.max(0, 1 - uiProgress / 0.75) : 0,
+          transition: 'opacity 0.4s ease',
+          pointerEvents: 'none',
+        }"
+      >
+        <span class="scroll-hint-label">Scroll to Discover</span>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:0;">
+          <svg class="scroll-chevron scroll-chevron-1" width="56" height="30" viewBox="0 0 56 30" fill="none">
+            <path d="M2 2l26 26L54 2" stroke="rgba(255,255,255,0.9)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <svg class="scroll-chevron scroll-chevron-2" width="56" height="30" viewBox="0 0 56 30" fill="none">
+            <path d="M2 2l26 26L54 2" stroke="rgba(255,255,255,0.55)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <svg class="scroll-chevron scroll-chevron-3" width="56" height="30" viewBox="0 0 56 30" fill="none">
+            <path d="M2 2l26 26L54 2" stroke="rgba(232,201,126,0.85)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
       </div>
 
       <!-- Title overlay — appears over last 25% (75% → 100%) -->
@@ -289,7 +284,7 @@ onUnmounted(() => {
           letterSpacing: '0.26em',
           textTransform: 'uppercase',
           textShadow: '0 2px 20px rgba(0,0,0,0.6)',
-          margin: 'clamp(14px, 2.5vh, 20px) 0 0',
+          margin: 'clamp(40px, 40vh, 400px) 0 0',
           textAlign: 'center',
         }">
           Arrive in Style · Explore the Aegean
@@ -354,12 +349,48 @@ onUnmounted(() => {
 </template>
 
 <style scoped>
-@keyframes scrollPulse {
-  0%, 100% { opacity: 0.65; transform: scaleY(1); }
-  50%       { opacity: 0.25; transform: scaleY(0.7); }
+/* ── Scroll hint: desktop — bottom left ── */
+.scroll-hint {
+  position: absolute;
+  bottom: clamp(36px, 5vh, 60px);
+  left: clamp(36px, 4vw, 64px);
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 14px;
 }
-.scroll-line {
-  animation: scrollPulse 2s ease-in-out infinite;
+.scroll-hint-label {
+  font-family: 'DM Sans', sans-serif;
+  font-size: clamp(16px, 1.8vw, 22px);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.85);
+  font-weight: 700;
+}
+
+/* ── Chevron cascade animation ── */
+@keyframes chevronCascade {
+  0%   { transform: translateY(-4px); opacity: 0; }
+  30%  { opacity: 1; }
+  60%  { transform: translateY(4px); opacity: 1; }
+  100% { transform: translateY(8px); opacity: 0; }
+}
+.scroll-chevron {
+  display: block;
+  margin-top: -8px;
+}
+.scroll-chevron-1 {
+  animation: chevronCascade 1.6s ease-in-out infinite;
+  animation-delay: 0s;
+}
+.scroll-chevron-2 {
+  animation: chevronCascade 1.6s ease-in-out infinite;
+  animation-delay: 0.2s;
+}
+.scroll-chevron-3 {
+  animation: chevronCascade 1.6s ease-in-out infinite;
+  animation-delay: 0.4s;
 }
 
 /* Mobile-only vignettes — hidden on desktop */
@@ -371,6 +402,28 @@ onUnmounted(() => {
 }
 
 @media (max-width: 768px) {
+  /* Scroll hint: move below the brand pill (~120px top + ~40px pill height + gap) */
+  .scroll-hint {
+    bottom: auto;
+    right: auto;
+    top: clamp(170px, 20vh, 210px);
+    left: 50%;
+    transform: translateX(-50%);
+    align-items: center;
+    gap: 12px;
+  }
+  .scroll-hint-label {
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    color: rgba(255, 255, 255, 0.85);
+  }
+  .scroll-chevron {
+    width: 44px;
+    height: 24px;
+    margin-top: -6px;
+  }
+
   /* Top: wide elliptical arc darkening the upper corners,
      brightest at the very top edges, fading toward centre */
   .mobile-vignette-top {

@@ -18,11 +18,9 @@ const FORMSPREE_ENDPOINT = 'https://formspree.io/f/xldbkeed';
 ───────────────────────────── */
 const LOCATIONS = [
   'Paros National Airport (PAS)',
-  'Parikia Port',
-  'Naoussa Port',
-  'Piso Livadi Port',
-  'Parikia Town Center',
+  'Parikia / Port of Paros',
   'Naoussa',
+  'Piso Livadi',
   'Santa Maria Beach',
   'Kolymbithres',
   'Golden Beach (Chryssi Akti)',
@@ -30,7 +28,7 @@ const LOCATIONS = [
   'Lefkes Village',
   'Drios',
   'Marpissa',
-  'Antiparos Ferry Terminal',
+  'Punta Port / Antiparos Ferry Terminal',
   'Custom location (pin on map)',
 ];
 
@@ -325,7 +323,6 @@ const isPortPickup = computed(() =>
   form.pickup &&
   (
     form.pickup.toLowerCase().includes('port') ||
-    form.pickup.toLowerCase().includes('piso livadi') ||
     form.pickup.toLowerCase().includes('antiparos')
   )
 );
@@ -1193,37 +1190,19 @@ onUnmounted(() => {
                     </div>
                   </div>
 
-                  <div class="two-col">
-                    <div class="field-group">
-                      <label class="field-label">Passengers</label>
+                  <div class="field-group">
+                    <label class="field-label">Passengers</label>
 
-                      <div class="counter-row">
-                        <button type="button" class="counter-button" @click="changePassengers(-1)">
-                          −
-                        </button>
+                    <div class="counter-row">
+                      <button type="button" class="counter-button" @click="changePassengers(-1)">
+                        −
+                      </button>
 
-                        <span class="counter-number">{{ form.passengers }}</span>
+                      <span class="counter-number">{{ form.passengers }}</span>
 
-                        <button type="button" class="counter-button" @click="changePassengers(1)">
-                          +
-                        </button>
-                      </div>
-                    </div>
-
-                    <div class="field-group">
-                      <label class="field-label">Luggage</label>
-
-                      <div class="counter-row">
-                        <button type="button" class="counter-button" @click="changeLuggage(-1)">
-                          −
-                        </button>
-
-                        <span class="counter-number">{{ form.luggage }}</span>
-
-                        <button type="button" class="counter-button" @click="changeLuggage(1)">
-                          +
-                        </button>
-                      </div>
+                      <button type="button" class="counter-button" @click="changePassengers(1)">
+                        +
+                      </button>
                     </div>
                   </div>
 
@@ -1367,24 +1346,16 @@ onUnmounted(() => {
                 <div v-else key="contact">
                   <h3 class="step-title">Your Details</h3>
 
-                  <div v-if="form.type === 'transfer'" class="price-box">
-                    <div>
-                      <div class="price-label">Indicative Price</div>
-
-                      <div class="price-meta">
-                        {{ form.passengers }} passenger{{ form.passengers !== 1 ? 's' : '' }}
-                        <template v-if="form.time && Number(form.time.split(':')[0]) < 6">
-                          · night surcharge +€15
-                        </template>
+                  <div class="price-box">
+                    <div style="display:flex;align-items:center;gap:10px;">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" style="flex-shrink:0;">
+                        <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z" stroke="rgba(232,201,126,0.8)" stroke-width="1.5"/>
+                        <path d="M12 8v4M12 16h.01" stroke="rgba(232,201,126,0.8)" stroke-width="1.5" stroke-linecap="round"/>
+                      </svg>
+                      <div>
+                        <div class="price-label">Pricing</div>
+                        <div class="price-request" style="font-size:13px;color:rgba(255,255,255,0.75);font-weight:400;letter-spacing:0;">We will contact you shortly with the price for your journey.</div>
                       </div>
-                    </div>
-
-                    <div v-if="indicativePrice" class="price-value">
-                      €{{ indicativePrice }}
-                    </div>
-
-                    <div v-else class="price-request">
-                      On request
                     </div>
                   </div>
 

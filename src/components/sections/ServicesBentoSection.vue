@@ -1,6 +1,5 @@
 <script setup>
 import { ref, onMounted } from 'vue';
-import { RouterLink } from 'vue-router';
 import parikiaPhoto  from '../../assets/etp-parikia.jpg';
 import logarasPhoto  from '../../assets/etp-logaras.jpg';
 import naousaPhoto   from '../../assets/etp-naousa.jpg';
@@ -179,9 +178,9 @@ onMounted(() => {
               maxWidth: i===0 ? '480px' : '260px',
             }">{{ svc.desc }}</p>
 
-            <RouterLink
+            <a
               v-if="svc.id === 'weddings' || svc.id === 'vip'"
-              to="/booking"
+              href="mailto:info@expresstransferparos.com"
               :style="{
                 display: 'inline-block',
                 padding: '9px 20px',
@@ -196,7 +195,7 @@ onMounted(() => {
                 transition: 'all 0.25s ease',
                 textDecoration: 'none',
               }"
-            >Enquire Now</RouterLink>
+            >Enquire Now</a>
             <button
               v-else
               @click.stop="emit('book')"

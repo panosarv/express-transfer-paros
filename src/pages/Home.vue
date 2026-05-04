@@ -15,7 +15,7 @@ import BookingDrawer        from '../components/ui/BookingDrawer.vue';
 
 const showBooking = ref(false);
 
-const PLACES        = ['Naoussa','Parikia','Golden Beach','Lefkes','Logaras','Antiparos','Butterfly Valley','Santa Maria','Paros Park','Alyki'];
+const PLACES        = ['Naoussa','Parikia','Golden Beach','Lefkes','Logaras','Antiparos','Santa Maria','Paros Park','Alyki'];
 const SERVICES_LIST = ['Airport Transfer','Port Pickup','Island Tours','VIP Service','Weddings','Hotel Transfer','Hourly Hire','Group Transfer'];
 </script>
 
