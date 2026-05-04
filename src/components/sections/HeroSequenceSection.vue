@@ -243,7 +243,9 @@ onUnmounted(() => {
       </div>
 
       <!-- Title overlay — appears over last 25% (75% → 100%) -->
-      <div :style="{
+      <div
+        class="title-overlay"
+        :style="{
         position: 'absolute',
         inset: 0,
         zIndex: 15,
@@ -260,7 +262,9 @@ onUnmounted(() => {
         pointerEvents: Math.max(0, (uiProgress - 0.75) / 0.25) > 0.4 ? 'auto' : 'none',
         background: `rgba(0,0,0,${Math.max(0, (uiProgress - 0.75) / 0.25) * 0.22})`,
       }">
-        <h1 :style="{
+        <h1
+          class="hero-title"
+          :style="{
           fontFamily: '\'Cormorant Garamond\', serif',
           fontWeight: 300,
           fontSize: 'clamp(48px, 8.5vw, 118px)',
@@ -402,6 +406,15 @@ onUnmounted(() => {
 }
 
 @media (max-width: 768px) {
+  /* Absolutely position h1 on mobile so it moves independently of the subtext */
+  .hero-title {
+    position: absolute !important;
+    top: 38vh;
+    left: 0;
+    right: 0;
+    margin: 0 !important;
+  }
+
   /* Scroll hint: move below the brand pill (~120px top + ~40px pill height + gap) */
   .scroll-hint {
     bottom: auto;
