@@ -1,7 +1,9 @@
 <script setup>
 import { ref, reactive, computed, watch, nextTick, onUnmounted } from 'vue';
-import { trackBookingSubmission } from '../../utils/analytics';
-
+import {
+  trackBookingSubmission,
+  trackGoogleAdsBookingConversion,
+} from '../../utils/analytics';
 const props = defineProps({
   open: {
     type: Boolean,
@@ -101,6 +103,7 @@ const form = reactive({
 const step = ref(1);
 const submitting = ref(false);
 const submitError = ref('');
+const bookingForm = ref(null);
 
 /* ─────────────────────────────
    Custom tour state
@@ -634,30 +637,31 @@ function buildNativePayload() {
 const nativePayload = computed(() => buildNativePayload());
 
 function handleNativeSubmit(event) {
+  event.preventDefault();
   submitError.value = '';
 
   if (!canNext.value) {
-    event.preventDefault();
     submitError.value = 'Please complete all required fields before submitting.';
     return;
   }
 
+  if (submitting.value) return;
+
   submitting.value = true;
 
-  if (typeof trackBookingSubmission === 'function') {
-    trackBookingSubmission({
-      ...form,
-      selectedTourLabel: selectedTour.value?.label || '',
-      indicativePrice: indicativePrice.value,
-      customTourDuration: getCustomTourDuration(),
-      customPlaces: [...customPlaces.value],
-    });
-  }
+  trackBookingSubmission({
+    ...form,
+    selectedTourLabel: selectedTour.value?.label || '',
+    indicativePrice: indicativePrice.value,
+    customTourDuration: getCustomTourDuration(),
+    customPlaces: [...customPlaces.value],
+  });
 
-  /*
-    Do not prevent default here.
-    Native form submission must continue to Formspree.
-  */
+  trackGoogleAdsBookingConversion(() => {
+    if (bookingForm.value) {
+      bookingForm.value.submit();
+    }
+  });
 }
 
 /* ─────────────────────────────
@@ -810,6 +814,7 @@ onUnmounted(() => {
       >
         <Transition name="modal-scale" mode="out-in">
           <form
+            ref="bookingForm"
             class="booking-modal"
             method="POST"
             :action="FORMSPREE_ENDPOINT"

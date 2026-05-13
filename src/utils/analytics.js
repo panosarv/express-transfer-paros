@@ -61,13 +61,42 @@ export function trackPhoneClick(source, linkType = 'tel', callback) {
  * Track booking form submissions
  * This can be used for tracking conversion when users submit booking requests
  */
-export function trackBookingSubmission(bookingType) {
-  if (typeof window.gtag === 'function') {
+export function trackBookingSubmission(bookingData = {}) {
+  if (typeof window !== 'undefined' && typeof window.gtag === 'function') {
     window.gtag('event', 'booking_submission', {
       event_category: 'conversion',
       event_label: 'Booking Form Submitted',
-      booking_type: bookingType
+      booking_type: bookingData.type || '',
+      tour_type: bookingData.tourType || '',
+      selected_tour_label: bookingData.selectedTourLabel || '',
+      indicative_price: bookingData.indicativePrice || '',
     });
+  }
+}
+
+/**
+ * Track Google Ads booking conversion
+ * Used before native Formspree submission.
+ */
+export function trackGoogleAdsBookingConversion(callback) {
+  let called = false;
+
+  const done = () => {
+    if (called) return;
+    called = true;
+    callback?.();
+  };
+
+  if (typeof window !== 'undefined' && typeof window.gtag === 'function') {
+    window.gtag('event', 'conversion', {
+      send_to: 'AW-16555501839/XxOWCKrT56QcEI_So9Y9',
+      event_callback: done,
+    });
+
+    // Fallback so the form still submits if Google Ads is blocked or delayed
+    setTimeout(done, 1500);
+  } else {
+    done();
   }
 }
 
