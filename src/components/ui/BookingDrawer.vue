@@ -146,164 +146,6 @@ let leafletMap = null;
 let leafletMarker = null;
 
 /* ─────────────────────────────
-   Price tables
-───────────────────────────── */
-const priceTables = {
-  Parikia: {
-    Naousa: { '1-4': 36, '5-8': 50 },
-    Monastiri: { '1-4': 40, '5-8': 55 },
-    'Airport - Alyki': { '1-4': 40, '5-8': 55 },
-    'Drios - ΧΑ': { '1-4': 50, '5-8': 65 },
-    Lefkes: { '1-4': 45, '5-8': 60 },
-    'Piso Livadi': { '1-4': 50, '5-8': 65 },
-    Pounta: { '1-4': 36, '5-8': 45 },
-    'Krios - cabana': { '1-4': 36, '5-8': 40 },
-    'SantaMaria - Ampelas': { '1-4': 45, '5-8': 60 },
-    Parikia: { '1-4': 36, '5-8': 50 },
-  },
-  Naousa: {
-    Parikia: { '1-4': 36, '5-8': 50 },
-    Monastiri: { '1-4': 36, '5-8': 45 },
-    'Airport - Alyki': { '1-4': 50, '5-8': 65 },
-    'Drios - ΧΑ': { '1-4': 45, '5-8': 60 },
-    Lefkes: { '1-4': 40, '5-8': 55 },
-    'Piso Livadi': { '1-4': 40, '5-8': 55 },
-    Pounta: { '1-4': 50, '5-8': 65 },
-    'Krios - cabana': { '1-4': 45, '5-8': 60 },
-    'SantaMaria - Ampelas': { '1-4': 36, '5-8': 45 },
-    Naousa: { '1-4': 36, '5-8': 50 },
-  },
-  'SantaMaria - Ampelas': {
-    Parikia: { '1-4': 45, '5-8': 60 },
-    Naousa: { '1-4': 36, '5-8': 45 },
-    Monastiri: { '1-4': 40, '5-8': 55 },
-    'Airport - Alyki': { '1-4': 55, '5-8': 70 },
-    'Drios - ΧΑ': { '1-4': 45, '5-8': 60 },
-    Lefkes: { '1-4': 40, '5-8': 55 },
-    'Piso Livadi': { '1-4': 40, '5-8': 55 },
-    Pounta: { '1-4': 55, '5-8': 70 },
-    'Krios - cabana': { '1-4': 45, '5-8': 60 },
-    'SantaMaria - Ampelas': { '1-4': 36, '5-8': 50 },
-  },
-  'Drios - ΧΑ': {
-    Parikia: { '1-4': 50, '5-8': 65 },
-    Naousa: { '1-4': 45, '5-8': 60 },
-    Monastiri: { '1-4': 50, '5-8': 65 },
-    'Airport - Alyki': { '1-4': 45, '5-8': 60 },
-    Lefkes: { '1-4': 45, '5-8': 60 },
-    'Piso Livadi': { '1-4': 40, '5-8': 55 },
-    Pounta: { '1-4': 50, '5-8': 65 },
-    'Krios - cabana': { '1-4': 55, '5-8': 70 },
-    'SantaMaria - Ampelas': { '1-4': 50, '5-8': 65 },
-    'Drios - ΧΑ': { '1-4': 36, '5-8': 50 },
-  },
-  'Airport - Alyki': {
-    Parikia: { '1-4': 40, '5-8': 55 },
-    Naousa: { '1-4': 50, '5-8': 65 },
-    Monastiri: { '1-4': 50, '5-8': 65 },
-    'Drios - ΧΑ': { '1-4': 45, '5-8': 60 },
-    Lefkes: { '1-4': 50, '5-8': 65 },
-    'Piso Livadi': { '1-4': 50, '5-8': 65 },
-    Pounta: { '1-4': 36, '5-8': 50 },
-    'Krios - cabana': { '1-4': 45, '5-8': 60 },
-    'SantaMaria - Ampelas': { '1-4': 55, '5-8': 70 },
-    'Airport - Alyki': { '1-4': 36, '5-8': 50 },
-  },
-  Lefkes: {
-    Parikia: { '1-4': 45, '5-8': 60 },
-    Naousa: { '1-4': 40, '5-8': 55 },
-    Monastiri: { '1-4': 45, '5-8': 60 },
-    'Airport - Alyki': { '1-4': 50, '5-8': 65 },
-    'Drios - ΧΑ': { '1-4': 45, '5-8': 60 },
-    'Piso Livadi': { '1-4': 45, '5-8': 60 },
-    Pounta: { '1-4': 50, '5-8': 65 },
-    'Krios - cabana': { '1-4': 50, '5-8': 65 },
-    'SantaMaria - Ampelas': { '1-4': 40, '5-8': 55 },
-    Lefkes: { '1-4': 36, '5-8': 50 },
-  },
-  'Piso Livadi': {
-    Parikia: { '1-4': 50, '5-8': 65 },
-    Naousa: { '1-4': 40, '5-8': 55 },
-    Monastiri: { '1-4': 45, '5-8': 60 },
-    'Airport - Alyki': { '1-4': 50, '5-8': 65 },
-    'Drios - ΧΑ': { '1-4': 45, '5-8': 60 },
-    Lefkes: { '1-4': 45, '5-8': 60 },
-    Pounta: { '1-4': 50, '5-8': 65 },
-    'Krios - cabana': { '1-4': 55, '5-8': 70 },
-    'SantaMaria - Ampelas': { '1-4': 45, '5-8': 60 },
-    'Piso Livadi': { '1-4': 36, '5-8': 50 },
-  },
-  'Krios - cabana': {
-    Parikia: { '1-4': 36, '5-8': 50 },
-    Naousa: { '1-4': 45, '5-8': 60 },
-    Monastiri: { '1-4': 36, '5-8': 50 },
-    'Airport - Alyki': { '1-4': 45, '5-8': 60 },
-    'Drios - ΧΑ': { '1-4': 55, '5-8': 70 },
-    Lefkes: { '1-4': 50, '5-8': 65 },
-    'Piso Livadi': { '1-4': 55, '5-8': 70 },
-    Pounta: { '1-4': 36, '5-8': 50 },
-    'SantaMaria - Ampelas': { '1-4': 45, '5-8': 60 },
-    'Krios - cabana': { '1-4': 36, '5-8': 50 },
-  },
-  Monastiri: {
-    Parikia: { '1-4': 40, '5-8': 55 },
-    Naousa: { '1-4': 36, '5-8': 45 },
-    'Airport - Alyki': { '1-4': 50, '5-8': 65 },
-    'Drios - ΧΑ': { '1-4': 50, '5-8': 65 },
-    Lefkes: { '1-4': 45, '5-8': 60 },
-    'Piso Livadi': { '1-4': 40, '5-8': 55 },
-    Pounta: { '1-4': 40, '5-8': 55 },
-    'Krios - cabana': { '1-4': 36, '5-8': 50 },
-    'SantaMaria - Ampelas': { '1-4': 40, '5-8': 55 },
-    Monastiri: { '1-4': 36, '5-8': 50 },
-  },
-};
-
-function normalizeLocation(loc) {
-  if (!loc) return null;
-
-  const value = loc.toLowerCase();
-
-  if (value.includes('airport')) return 'Airport - Alyki';
-  if (value.includes('alyki')) return 'Airport - Alyki';
-  if (value.includes('antiparos')) return 'Pounta';
-  if (value.includes('piso livadi')) return 'Piso Livadi';
-  if (value.includes('santa maria') || value.includes('kolymbithres')) return 'SantaMaria - Ampelas';
-  if (value.includes('golden beach') || value.includes('chryssi') || value.includes('drios')) return 'Drios - ΧΑ';
-  if (value.includes('lefkes')) return 'Lefkes';
-  if (value.includes('marpissa')) return 'Piso Livadi';
-  if (value.includes('naousa') || value.includes('naoussa')) return 'Naousa';
-  if (value.includes('parikia')) return 'Parikia';
-
-  return null;
-}
-
-const indicativePrice = computed(() => {
-  if (form.type !== 'transfer') return null;
-
-  const from = normalizeLocation(form.pickup);
-  const to = normalizeLocation(form.dropoff);
-
-  if (!from || !to) return null;
-
-  const origin = priceTables[from] || {};
-  const rates = origin[to] || (priceTables[to] && priceTables[to][from]);
-
-  if (!rates) return null;
-
-  const bracket = form.passengers <= 4 ? '1-4' : '5-8';
-  let price = rates[bracket];
-
-  const hour = Number((form.time || '').split(':')[0]);
-
-  if (form.time && hour < 6) {
-    price += 15;
-  }
-
-  return price;
-});
-
-/* ─────────────────────────────
    Computed
 ───────────────────────────── */
 const totalSteps = computed(() => (form.type === 'transfer' ? 4 : 3));
@@ -602,20 +444,6 @@ function buildNativePayload() {
         : '',
 
     /*
-      Price
-    */
-    indicativePrice: indicativePrice.value || '',
-    indicativePriceEur: indicativePrice.value || '',
-    indicativePriceLabel: form.type === 'transfer'
-      ? indicativePrice.value
-        ? `€${indicativePrice.value}`
-        : 'On request'
-      : '',
-    nightSurchargeApplied: form.type === 'transfer' && form.time
-      ? Number(form.time.split(':')[0]) < 6
-      : false,
-
-    /*
       Custom tour
     */
     customTourDuration: getCustomTourDuration(),
@@ -652,7 +480,6 @@ function handleNativeSubmit(event) {
   trackBookingSubmission({
     ...form,
     selectedTourLabel: selectedTour.value?.label || '',
-    indicativePrice: indicativePrice.value,
     customTourDuration: getCustomTourDuration(),
     customPlaces: [...customPlaces.value],
   });
@@ -1351,19 +1178,6 @@ onUnmounted(() => {
                 <div v-else key="contact">
                   <h3 class="step-title">Your Details</h3>
 
-                  <div class="price-box">
-                    <div style="display:flex;align-items:center;gap:10px;">
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" style="flex-shrink:0;">
-                        <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z" stroke="rgba(232,201,126,0.8)" stroke-width="1.5"/>
-                        <path d="M12 8v4M12 16h.01" stroke="rgba(232,201,126,0.8)" stroke-width="1.5" stroke-linecap="round"/>
-                      </svg>
-                      <div>
-                        <div class="price-label">Pricing</div>
-                        <div class="price-request" style="font-size:13px;color:rgba(255,255,255,0.75);font-weight:400;letter-spacing:0;">We will contact you shortly with the price for your journey.</div>
-                      </div>
-                    </div>
-                  </div>
-
                   <div class="two-col">
                     <div class="field-group">
                       <label class="field-label">First Name</label>
@@ -1902,8 +1716,7 @@ onUnmounted(() => {
 }
 
 .info-box,
-.error-box,
-.price-box {
+.error-box {
   border-radius: 12px;
   padding: 14px 16px;
   margin-bottom: 20px;
@@ -2054,45 +1867,6 @@ onUnmounted(() => {
 .place-line {
   width: 20px;
   border-top: 1.5px dashed rgba(232, 201, 126, 0.35);
-}
-
-.price-box {
-  background: rgba(232, 201, 126, 0.07);
-  border: 1px solid rgba(232, 201, 126, 0.25);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.price-label {
-  font-family: 'DM Sans', sans-serif;
-  font-size: 10px;
-  font-weight: 600;
-  color: rgba(255, 255, 255, 0.4);
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  margin-bottom: 4px;
-}
-
-.price-meta {
-  font-family: 'DM Sans', sans-serif;
-  font-size: 12px;
-  color: rgba(255, 255, 255, 0.35);
-}
-
-.price-value {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 36px;
-  font-weight: 600;
-  color: var(--gold, #e8c97e);
-}
-
-.price-request {
-  font-family: 'DM Sans', sans-serif;
-  font-size: 13px;
-  font-weight: 600;
-  color: rgba(255, 255, 255, 0.35);
-  letter-spacing: 0.05em;
 }
 
 .error-box {

@@ -69,7 +69,6 @@ export function trackBookingSubmission(bookingData = {}) {
       booking_type: bookingData.type || '',
       tour_type: bookingData.tourType || '',
       selected_tour_label: bookingData.selectedTourLabel || '',
-      indicative_price: bookingData.indicativePrice || '',
     });
   }
 }

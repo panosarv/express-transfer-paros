@@ -65,7 +65,9 @@ const SERVICES_LIST = ['Airport Transfer','Port Pickup','Island Tours','VIP Serv
       <ReviewsSection />
     </div>
 
-    <ContactCTASection @book="showBooking = true" />
+    <div id="contact">
+      <ContactCTASection @book="showBooking = true" />
+    </div>
 
     <Footer />
 
